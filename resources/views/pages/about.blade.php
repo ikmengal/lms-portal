@@ -24,7 +24,7 @@
                 <div class="bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl p-10">
                     <div class="grid grid-cols-2 gap-8">
                         <div class="text-center">
-                            <div class="text-4xl font-bold text-primary-700 mb-1">10K+</div>
+                            <div class="text-4xl font-bold text-primary-700 mb-1">{{ number_format($stats['students']) }}+</div>
                             <p class="text-sm text-gray-600">Active Learners</p>
                         </div>
                         <div class="text-center">
@@ -32,11 +32,11 @@
                             <p class="text-sm text-gray-600">Countries</p>
                         </div>
                         <div class="text-center">
-                            <div class="text-4xl font-bold text-primary-700 mb-1">500+</div>
+                            <div class="text-4xl font-bold text-primary-700 mb-1">{{ number_format($stats['courses']) }}+</div>
                             <p class="text-sm text-gray-600">Courses</p>
                         </div>
                         <div class="text-center">
-                            <div class="text-4xl font-bold text-primary-700 mb-1">200+</div>
+                            <div class="text-4xl font-bold text-primary-700 mb-1">{{ number_format($stats['instructors']) }}+</div>
                             <p class="text-sm text-gray-600">Expert Instructors</p>
                         </div>
                     </div>
@@ -93,6 +93,21 @@
                     </div>
                 @endforeach
             </div>
+        </div>
+    </section>
+
+    {{-- Explore --}}
+    <section class="py-20 bg-gradient-to-r from-primary-900 to-primary-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold text-white mb-4">Start Your Learning Journey Today</h2>
+            <p class="text-primary-200 max-w-2xl mx-auto mb-10">Join thousands of learners, earn verified certificates, and build skills that move your career forward.</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="{{ route('courses.index') }}" class="px-7 py-3.5 bg-white text-primary-700 hover:bg-primary-50 font-bold rounded-xl transition shadow-lg">Browse Courses</a>
+                <a href="{{ route('instructors') }}" class="px-7 py-3.5 bg-primary-700/40 hover:bg-primary-700/60 text-white font-semibold rounded-xl transition border border-white/20">Meet Our Instructors</a>
+            </div>
+            @if($stats['certificates'] > 0)
+                <p class="mt-8 text-sm text-primary-300">{{ number_format($stats['certificates']) }} certificates already issued to learners worldwide.</p>
+            @endif
         </div>
     </section>
 @endsection

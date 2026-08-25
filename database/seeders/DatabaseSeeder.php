@@ -96,5 +96,6 @@ class DatabaseSeeder extends Seeder
         $this->call(LearningSeeder::class);
         $this->call(QuizzesSeeder::class);
         $this->call(SettingsSeeder::class);
+        $this->call(BlogSeeder::class);
     }
 }

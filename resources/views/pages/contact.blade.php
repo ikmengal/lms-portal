@@ -1,5 +1,7 @@
 @extends('layouts.app')
+
 @section('title', 'Contact Us')
+
 @section('content')
     <div class="bg-gradient-to-r from-primary-900 to-primary-800 py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -16,19 +18,19 @@
                 <div class="space-y-8">
                     <div>
                         <h3 class="text-lg font-bold text-gray-900 mb-4">Get in Touch</h3>
-                        <p class="text-gray-600 text-sm leading-relaxed">Have questions about our courses, pricing, or anything else? Our team is ready to help.</p>
+                        <p class="text-gray-600 text-sm leading-relaxed">Have questions about our courses, pricing, or anything else? Our team is ready to help — we reply within 24 hours.</p>
                     </div>
 
                     <div class="space-y-6">
-                        <div class="flex items-start gap-4">
+                        <a href="mailto:{{ $site['support_email'] ?? 'support@lmsportal.com' }}" class="flex items-start gap-4 group">
                             <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
                             </div>
                             <div>
                                 <p class="font-semibold text-gray-900 text-sm">Email Us</p>
-                                <p class="text-gray-600 text-sm">support@lmsportal.com</p>
+                                <p class="text-gray-600 text-sm group-hover:text-primary-600 transition">{{ $site['support_email'] ?? 'support@lmsportal.com' }}</p>
                             </div>
-                        </div>
+                        </a>
 
                         <div class="flex items-start gap-4">
                             <div class="w-10 h-10 bg-accent-100 rounded-lg flex items-center justify-center shrink-0">
@@ -36,7 +38,7 @@
                             </div>
                             <div>
                                 <p class="font-semibold text-gray-900 text-sm">Call Us</p>
-                                <p class="text-gray-600 text-sm">+1 (800) 123-4567</p>
+                                <p class="text-gray-600 text-sm">{{ $site['contact_phone'] ?? '+1 (800) 123-4567' }}</p>
                                 <p class="text-gray-400 text-xs">Mon-Fri 9AM-6PM EST</p>
                             </div>
                         </div>
@@ -51,39 +53,61 @@
                             </div>
                         </div>
                     </div>
+
+                    {{-- Quick links --}}
+                    <div class="bg-primary-50 rounded-2xl p-6">
+                        <h4 class="font-bold text-gray-900 text-sm mb-3">Quick Answers</h4>
+                        <ul class="space-y-2.5 text-sm">
+                            <li><a href="{{ route('faq') }}" class="flex items-center gap-2 text-primary-700 hover:text-primary-900 transition"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>Browse the FAQ</a></li>
+                            <li><a href="{{ route('certificates.index') }}" class="flex items-center gap-2 text-primary-700 hover:text-primary-900 transition"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>Verify a certificate</a></li>
+                            <li><a href="{{ route('pricing') }}" class="flex items-center gap-2 text-primary-700 hover:text-primary-900 transition"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>Pricing &amp; plans</a></li>
+                        </ul>
+                    </div>
                 </div>
 
                 {{-- Contact Form --}}
                 <div class="lg:col-span-2">
                     <div class="bg-white rounded-2xl shadow-lg p-8">
-                        <form class="space-y-5">
+                        <form method="POST" action="{{ route('contact.submit') }}" class="space-y-5">
+                            @csrf
+
                             <div class="grid sm:grid-cols-2 gap-5">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
-                                    <input type="text" placeholder="John Doe" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition">
+                                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1.5">Full Name <span class="text-red-400">*</span></label>
+                                    <input id="name" type="text" name="name" value="{{ old('name') }}" placeholder="John Doe"
+                                        class="w-full px-4 py-3 border {{ $errors->has('name') ? 'border-red-300' : 'border-gray-200' }} rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition">
+                                    @error('name')<p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>@enderror
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
-                                    <input type="email" placeholder="you@example.com" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition">
+                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Email Address <span class="text-red-400">*</span></label>
+                                    <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="you@example.com"
+                                        class="w-full px-4 py-3 border {{ $errors->has('email') ? 'border-red-300' : 'border-gray-200' }} rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition">
+                                    @error('email')<p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>@enderror
                                 </div>
                             </div>
+
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Subject</label>
-                                <select class="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition">
-                                    <option>Select a topic</option>
-                                    <option>Course Inquiry</option>
-                                    <option>Technical Support</option>
-                                    <option>Billing & Payments</option>
-                                    <option>Partnership</option>
-                                    <option>Other</option>
+                                <label for="subject" class="block text-sm font-medium text-gray-700 mb-1.5">Subject <span class="text-red-400">*</span></label>
+                                <select id="subject" name="subject"
+                                    class="w-full px-4 py-3 border {{ $errors->has('subject') ? 'border-red-300' : 'border-gray-200' }} rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition">
+                                    <option value="" disabled {{ old('subject') ? '' : 'selected' }}>Select a topic</option>
+                                    @foreach(['Course Inquiry', 'Technical Support', 'Billing & Payments', 'Partnership', 'Become an Instructor', 'Other'] as $topic)
+                                        <option value="{{ $topic }}" {{ old('subject') === $topic ? 'selected' : '' }}>{{ $topic }}</option>
+                                    @endforeach
                                 </select>
+                                @error('subject')<p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>@enderror
                             </div>
+
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Message</label>
-                                <textarea rows="5" placeholder="Tell us how we can help..." class="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition resize-none"></textarea>
+                                <label for="message" class="block text-sm font-medium text-gray-700 mb-1.5">Message <span class="text-red-400">*</span></label>
+                                <textarea id="message" rows="5" name="message" placeholder="Tell us how we can help..."
+                                    class="w-full px-4 py-3 border {{ $errors->has('message') ? 'border-red-300' : 'border-gray-200' }} rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition resize-none">{{ old('message') }}</textarea>
+                                @error('message')<p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>@enderror
                             </div>
-                            <button type="submit" class="px-8 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition shadow-lg shadow-primary-600/25">
+
+                            <button type="submit" class="px-8 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition shadow-lg shadow-primary-600/25 inline-flex items-center gap-2">
                                 Send Message
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
                             </button>
                         </form>
                     </div>

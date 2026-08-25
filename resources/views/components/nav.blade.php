@@ -11,8 +11,8 @@
             @endif
         </div>
         <div class="flex items-center gap-4">
-            <a href="#" class="hover:text-accent-400 transition">Enterprise Training</a>
-            <a href="#" class="hover:text-accent-400 transition">Become an Instructor</a>
+            <a href="{{ route('pricing') }}" class="hover:text-accent-400 transition">Enterprise Training</a>
+            <a href="{{ route('instructors') }}" class="hover:text-accent-400 transition">Become an Instructor</a>
         </div>
     </div>
 </div>
@@ -48,42 +48,23 @@
                         Categories
                         <svg class="w-4 h-4 transition" :class="open && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
-                    <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-1" class="absolute top-full left-0 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-2 mt-1" style="display:none;">
-                        <a href="{{ route('courses.index') }}?category=data-science" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition">
-                            <span class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 text-xs font-bold">DS</span>
-                            Data Science & Analytics
-                        </a>
-                        <a href="{{ route('courses.index') }}?category=ai-ml" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition">
-                            <span class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-xs font-bold">AI</span>
-                            Artificial Intelligence
-                        </a>
-                        <a href="{{ route('courses.index') }}?category=cloud" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition">
-                            <span class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 text-xs font-bold">CL</span>
-                            Cloud Computing
-                        </a>
-                        <a href="{{ route('courses.index') }}?category=cyber-security" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition">
-                            <span class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center text-red-600 text-xs font-bold">CS</span>
-                            Cyber Security
-                        </a>
-                        <a href="{{ route('courses.index') }}?category=devops" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition">
-                            <span class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600 text-xs font-bold">DO</span>
-                            DevOps
-                        </a>
-                        <a href="{{ route('courses.index') }}?category=project-management" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition">
-                            <span class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-600 text-xs font-bold">PM</span>
-                            Project Management
-                        </a>
-                        <a href="{{ route('courses.index') }}?category=software-dev" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition">
-                            <span class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-xs font-bold">SD</span>
-                            Software Development
-                        </a>
-                        <div class="border-t border-gray-100 mt-1 pt-1">
-                            <a href="{{ route('courses.index') }}" class="block px-4 py-2.5 text-sm font-medium text-primary-600 hover:bg-primary-50 transition">View All Categories &rarr;</a>
+                        <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-1" class="absolute top-full left-0 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-2 mt-1 max-h-[420px] overflow-y-auto" style="display:none;">
+                            @foreach(\App\Models\CourseCategory::where('is_active', true)->withCount(['courses as courses_count' => fn ($q) => $q->whereNull('deleted_at')])->orderByDesc('courses_count')->take(7)->get() as $navCat)
+                                <a href="{{ route('courses.index', ['category' => $navCat->slug]) }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition">
+                                    <span class="w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center text-primary-600 text-[10px] font-bold">{{ collect(explode(' ', $navCat->name))->map(fn ($w) => mb_substr($w, 0, 1))->take(2)->implode('') }}</span>
+                                    {{ $navCat->name }}
+                                </a>
+                            @endforeach
+                            <div class="border-t border-gray-100 mt-1 pt-1">
+                                <a href="{{ route('categories') }}" class="block px-4 py-2.5 text-sm font-medium text-primary-600 hover:bg-primary-50 transition">View All Categories &rarr;</a>
+                            </div>
                         </div>
-                    </div>
                 </div>
 
                 <a href="{{ route('courses.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg hover:bg-primary-50 hover:text-primary-700 transition {{ request()->routeIs('courses.*') ? 'text-primary-700 bg-primary-50' : 'text-gray-700' }}">Courses</a>
+                <a href="{{ route('instructors') }}" class="px-3 py-2 text-sm font-medium rounded-lg hover:bg-primary-50 hover:text-primary-700 transition {{ request()->routeIs('instructors*') ? 'text-primary-700 bg-primary-50' : 'text-gray-700' }}">Instructors</a>
+                <a href="{{ route('pricing') }}" class="px-3 py-2 text-sm font-medium rounded-lg hover:bg-primary-50 hover:text-primary-700 transition {{ request()->routeIs('pricing') ? 'text-primary-700 bg-primary-50' : 'text-gray-700' }}">Pricing</a>
+                <a href="{{ route('blog') }}" class="px-3 py-2 text-sm font-medium rounded-lg hover:bg-primary-50 hover:text-primary-700 transition {{ request()->routeIs('blog*') ? 'text-primary-700 bg-primary-50' : 'text-gray-700' }}">Blog</a>
                 <a href="{{ route('about') }}" class="px-3 py-2 text-sm font-medium rounded-lg hover:bg-primary-50 hover:text-primary-700 transition {{ request()->routeIs('about') ? 'text-primary-700 bg-primary-50' : 'text-gray-700' }}">About</a>
                 <a href="{{ route('contact') }}" class="px-3 py-2 text-sm font-medium rounded-lg hover:bg-primary-50 hover:text-primary-700 transition {{ request()->routeIs('contact') ? 'text-primary-700 bg-primary-50' : 'text-gray-700' }}">Contact</a>
             </nav>
@@ -179,7 +160,13 @@
     <div x-show="mobileOpen" x-transition class="lg:hidden border-t border-gray-100" style="display:none;">
         <div class="max-w-7xl mx-auto px-4 py-4 space-y-1">
             <a href="{{ route('home') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition">Home</a>
+            <a href="{{ route('categories') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition">Categories</a>
             <a href="{{ route('courses.index') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition">All Courses</a>
+            <a href="{{ route('instructors') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition">Instructors</a>
+            <a href="{{ route('pricing') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition">Pricing</a>
+            <a href="{{ route('blog') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition">Blog</a>
+            <a href="{{ route('certificates.index') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition">Verify Certificate</a>
+            <a href="{{ route('faq') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition">FAQ</a>
             <a href="{{ route('about') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition">About</a>
             <a href="{{ route('contact') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition">Contact</a>
             <div class="border-t border-gray-100 pt-3 mt-3 space-y-2">

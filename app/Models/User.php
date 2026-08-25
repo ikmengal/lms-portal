@@ -40,6 +40,11 @@ class User extends Authenticatable
         return $this->hasMany(Certificate::class);
     }
 
+    public function courses(): HasMany
+    {
+        return $this->hasMany(Course::class, 'instructor_id');
+    }
+
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);

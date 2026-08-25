@@ -1,7 +1,7 @@
 <footer class="bg-gray-900 text-gray-300">
     {{-- Main Footer --}}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
 
             {{-- Brand --}}
             <div class="lg:col-span-1">
@@ -51,16 +51,15 @@
                 </div>
             </div>
 
-            {{-- Courses --}}
+            {{-- Explore --}}
             <div>
-                <h3 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Popular Courses</h3>
+                <h3 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Explore</h3>
                 <ul class="space-y-3">
-                    <li><a href="#" class="text-sm hover:text-accent-400 transition">Python for Data Science</a></li>
-                    <li><a href="#" class="text-sm hover:text-accent-400 transition">Machine Learning</a></li>
-                    <li><a href="#" class="text-sm hover:text-accent-400 transition">AWS Cloud Practitioner</a></li>
-                    <li><a href="#" class="text-sm hover:text-accent-400 transition">PMP Certification</a></li>
-                    <li><a href="#" class="text-sm hover:text-accent-400 transition">Cyber Security Expert</a></li>
-                    <li><a href="#" class="text-sm hover:text-accent-400 transition">Full Stack Development</a></li>
+                    <li><a href="{{ route('categories') }}" class="text-sm hover:text-accent-400 transition">Categories</a></li>
+                    <li><a href="{{ route('courses.index') }}" class="text-sm hover:text-accent-400 transition">All Courses</a></li>
+                    <li><a href="{{ route('instructors') }}" class="text-sm hover:text-accent-400 transition">Instructors</a></li>
+                    <li><a href="{{ route('pricing') }}" class="text-sm hover:text-accent-400 transition">Pricing</a></li>
+                    <li><a href="{{ route('certificates.index') }}" class="text-sm hover:text-accent-400 transition">Verify a Certificate</a></li>
                 </ul>
             </div>
 
@@ -69,23 +68,9 @@
                 <h3 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Company</h3>
                 <ul class="space-y-3">
                     <li><a href="{{ route('about') }}" class="text-sm hover:text-accent-400 transition">About Us</a></li>
-                    <li><a href="#" class="text-sm hover:text-accent-400 transition">Careers</a></li>
-                    <li><a href="#" class="text-sm hover:text-accent-400 transition">Blog</a></li>
-                    <li><a href="#" class="text-sm hover:text-accent-400 transition">Press</a></li>
-                    <li><a href="#" class="text-sm hover:text-accent-400 transition">Partners</a></li>
+                    <li><a href="{{ route('blog') }}" class="text-sm hover:text-accent-400 transition">Blog</a></li>
                     <li><a href="{{ route('contact') }}" class="text-sm hover:text-accent-400 transition">Contact Us</a></li>
-                </ul>
-            </div>
-
-            {{-- Support --}}
-            <div>
-                <h3 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Support</h3>
-                <ul class="space-y-3">
-                    <li><a href="#" class="text-sm hover:text-accent-400 transition">Help Center</a></li>
-                    <li><a href="#" class="text-sm hover:text-accent-400 transition">Terms of Service</a></li>
-                    <li><a href="#" class="text-sm hover:text-accent-400 transition">Privacy Policy</a></li>
-                    <li><a href="#" class="text-sm hover:text-accent-400 transition">Refund Policy</a></li>
-                    <li><a href="#" class="text-sm hover:text-accent-400 transition">FAQs</a></li>
+                    <li><a href="{{ route('faq') }}" class="text-sm hover:text-accent-400 transition">FAQs</a></li>
                 </ul>
 
                 {{-- Newsletter --}}

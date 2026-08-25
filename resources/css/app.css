@@ -44,3 +44,7 @@
     --color-secondary-950: #052e16;
 }
 
+[x-cloak] {
+    display: none !important;
+}
+

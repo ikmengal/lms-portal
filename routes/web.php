@@ -33,6 +33,16 @@ Route::controller(CourseController::class)->group(function () {
 Route::controller(PageController::class)->group(function () {
     Route::get('/about', 'about')->name('about');
     Route::get('/contact', 'contact')->name('contact');
+    Route::post('/contact', 'contactSubmit')->name('contact.submit');
+    Route::get('/categories', 'categories')->name('categories');
+    Route::get('/instructors', 'instructors')->name('instructors');
+    Route::get('/instructors/{instructor}', 'instructorShow')->name('instructors.show');
+    Route::get('/blog', 'blog')->name('blog');
+    Route::get('/blog/{post}', 'blogShow')->name('blog.show');
+    Route::get('/faq', 'faq')->name('faq');
+    Route::get('/pricing', 'pricing')->name('pricing');
+    Route::get('/certificates', 'certificates')->name('certificates.index');
+    Route::get('/verify-certificate', 'certificateLookup')->name('certificates.lookup');
 });
 
 // Public Certificate Verification
