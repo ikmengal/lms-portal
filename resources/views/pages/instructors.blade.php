@@ -4,34 +4,66 @@
 
 @section('content')
     {{-- Page Header --}}
-    <div class="bg-gradient-to-r from-primary-900 to-primary-800 py-14">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Meet Our Instructors</h1>
-            <p class="text-primary-200 max-w-2xl">Learn from industry experts who've shipped real products, led real teams, and taught thousands of students.</p>
-            <div class="mt-4 flex items-center gap-2 text-sm text-primary-300">
+    <div class="relative overflow-hidden bg-gradient-to-br from-primary-950 via-primary-900 to-primary-800 py-14 md:py-20">
+        {{-- Decorative layers --}}
+        <div class="pointer-events-none absolute inset-0 select-none" aria-hidden="true">
+            <div class="absolute -top-28 -right-24 w-[26rem] h-[26rem] rounded-full bg-primary-500/25 blur-3xl"></div>
+            <div class="absolute -bottom-36 -left-20 w-96 h-96 rounded-full bg-accent-500/15 blur-3xl"></div>
+            <div class="absolute inset-0 opacity-[0.06]" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 26px 26px;"></div>
+        </div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {{-- Breadcrumb --}}
+            <nav class="flex items-center gap-2 text-sm text-primary-300 mb-6">
                 <a href="{{ route('home') }}" class="hover:text-white transition">Home</a>
-                <span>/</span>
-                <span class="text-white">Instructors</span>
+                <span aria-hidden="true">/</span>
+                <span class="text-white font-medium">Instructors</span>
+            </nav>
+
+            <div class="max-w-2xl">
+                <h1 class="text-3xl md:text-5xl font-bold tracking-tight text-white mb-4">Meet Our Instructors</h1>
+                <p class="text-base md:text-lg text-primary-200 leading-relaxed">Learn from industry experts who've shipped real products, led real teams, and taught thousands of students worldwide.</p>
             </div>
 
-            <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl">
-                <div class="bg-white/10 backdrop-blur rounded-xl px-4 py-3 text-center">
-                    <div class="text-2xl font-bold text-white">{{ number_format($totals['instructors']) }}+</div>
-                    <div class="text-xs text-primary-200 uppercase tracking-wide">Instructors</div>
+            {{-- Stats --}}
+            <dl class="mt-10 grid grid-cols-2 md:flex md:items-stretch gap-y-6 gap-x-10 max-w-4xl">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-11 h-11 shrink-0 rounded-xl bg-white/10 backdrop-blur grid place-items-center">
+                        <svg class="w-6 h-6 text-accent-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
+                    </div>
+                    <div>
+                        <dd class="text-2xl font-bold text-white leading-none">{{ number_format($totals['instructors']) }}+</dd>
+                        <dt class="text-[11px] font-semibold uppercase tracking-wider text-primary-300 mt-1.5">Instructors</dt>
+                    </div>
                 </div>
-                <div class="bg-white/10 backdrop-blur rounded-xl px-4 py-3 text-center">
-                    <div class="text-2xl font-bold text-white">{{ number_format($totals['courses']) }}</div>
-                    <div class="text-xs text-primary-200 uppercase tracking-wide">Courses</div>
+                <div class="flex items-center gap-3.5 md:border-l md:border-white/10 md:pl-10">
+                    <div class="w-11 h-11 shrink-0 rounded-xl bg-white/10 backdrop-blur grid place-items-center">
+                        <svg class="w-6 h-6 text-accent-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+                    </div>
+                    <div>
+                        <dd class="text-2xl font-bold text-white leading-none">{{ number_format($totals['courses']) }}</dd>
+                        <dt class="text-[11px] font-semibold uppercase tracking-wider text-primary-300 mt-1.5">Courses</dt>
+                    </div>
                 </div>
-                <div class="bg-white/10 backdrop-blur rounded-xl px-4 py-3 text-center">
-                    <div class="text-2xl font-bold text-white">{{ number_format($totals['students']) }}</div>
-                    <div class="text-xs text-primary-200 uppercase tracking-wide">Learners</div>
+                <div class="flex items-center gap-3.5 md:border-l md:border-white/10 md:pl-10">
+                    <div class="w-11 h-11 shrink-0 rounded-xl bg-white/10 backdrop-blur grid place-items-center">
+                        <svg class="w-6 h-6 text-accent-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.62 48.62 0 0112 20.904a48.62 48.62 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.636 50.636 0 00-2.658-.813A59.906 59.906 0 0112 3.493a59.903 59.903 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5"/></svg>
+                    </div>
+                    <div>
+                        <dd class="text-2xl font-bold text-white leading-none">{{ number_format($totals['students']) }}</dd>
+                        <dt class="text-[11px] font-semibold uppercase tracking-wider text-primary-300 mt-1.5">Learners</dt>
+                    </div>
                 </div>
-                <div class="bg-white/10 backdrop-blur rounded-xl px-4 py-3 text-center">
-                    <div class="text-2xl font-bold text-white">{{ $totals['countries'] }}+</div>
-                    <div class="text-xs text-primary-200 uppercase tracking-wide">Countries</div>
+                <div class="flex items-center gap-3.5 md:border-l md:border-white/10 md:pl-10">
+                    <div class="w-11 h-11 shrink-0 rounded-xl bg-white/10 backdrop-blur grid place-items-center">
+                        <svg class="w-6 h-6 text-accent-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+                    </div>
+                    <div>
+                        <dd class="text-2xl font-bold text-white leading-none">{{ $totals['countries'] }}+</dd>
+                        <dt class="text-[11px] font-semibold uppercase tracking-wider text-primary-300 mt-1.5">Countries</dt>
+                    </div>
                 </div>
-            </div>
+            </dl>
         </div>
     </div>
 

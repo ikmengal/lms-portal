@@ -11,14 +11,29 @@
 
 <div class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-primary-200 transition-all duration-300 overflow-hidden flex flex-col">
     {{-- Header banner --}}
-    <div class="relative h-24 bg-gradient-to-r from-primary-600 to-primary-800">
-        <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 20% 50%, white 1px, transparent 1px); background-size: 18px 18px;"></div>
-        <span class="absolute top-3 right-3 px-2.5 py-1 bg-white/90 backdrop-blur text-xs font-semibold rounded-md text-gray-700">
+    <div class="relative h-28 overflow-hidden">
+        @if($instructor->banner_url)
+            <img src="{{ $instructor->banner_url }}" alt="" class="absolute inset-0 w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-primary-950/70 via-primary-900/25 to-transparent"></div>
+        @else
+            <div class="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900"></div>
+            {{-- Decorative SVG pattern --}}
+            <svg class="absolute inset-0 w-full h-full opacity-[0.12]" preserveAspectRatio="none" aria-hidden="true">
+                <defs>
+                    <pattern id="card-dots-{{ $instructor->id }}" width="18" height="18" patternUnits="userSpaceOnUse">
+                        <circle cx="2" cy="2" r="1.5" fill="white"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#card-dots-{{ $instructor->id }})"/>
+            </svg>
+            <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-accent-400/20 blur-2xl" aria-hidden="true"></div>
+        @endif
+        <span class="absolute top-3 right-3 inline-flex items-center gap-1 px-2.5 py-1 bg-white/95 backdrop-blur shadow-sm text-xs font-semibold rounded-full text-gray-700">
             {{ number_format($instructor->students_count ?? 0) }} Students
         </span>
     </div>
 
-    <div class="flex-1 flex flex-col px-6 pb-6 -mt-10">
+    <div class="flex-1 flex flex-col px-6 pb-6 -mt-10" style="z-index: 0">
         {{-- Avatar --}}
         @if($instructor->avatar_url)
             <img src="{{ $instructor->avatar_url }}" alt="{{ $instructor->name }}" class="w-20 h-20 rounded-2xl object-cover ring-4 ring-white shadow-md mb-4">
