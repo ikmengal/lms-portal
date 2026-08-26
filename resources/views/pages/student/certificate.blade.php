@@ -170,12 +170,18 @@
                         </div>
 
                         {{-- Footer verification strip --}}
-                        <div class="w-full border-t border-white/10 pt-2.5">
-                            <p class="text-[11px] select-all" style="color: rgba(255,214,178,.55);">
+                        <div class="w-full border-t border-white/10 pt-2.5 flex items-end justify-between gap-6">
+                            <p class="text-[11px] text-left select-all flex-1" style="color: rgba(255,214,178,.55);">
                                 Certificate ID: <span class="font-mono font-bold text-[#ffb37a] select-all">{{ $certificate->code }}</span>
                                 <span class="mx-2 text-white/20">|</span>
                                 Verify at: <span class="font-mono text-[#8ebbff] select-all">{{ url('/verify-certificate/' . $certificate->code) }}</span>
                             </p>
+                            <div class="flex items-center gap-2.5 shrink-0">
+                                <span class="text-[9px] uppercase tracking-[0.2em] text-right leading-tight" style="color: rgba(255,200,150,.55);">Scan to<br>verify</span>
+                                <div class="bg-white rounded-md p-1 shadow-lg">
+                                    {!! qr_svg($certificate->verificationUrl(), 64) !!}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

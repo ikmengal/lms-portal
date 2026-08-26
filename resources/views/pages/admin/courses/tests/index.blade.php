@@ -48,7 +48,12 @@
                                     <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">Inactive</span>
                                 @endif
                             </div>
-                            <p class="text-xs text-gray-400 mt-1">{{ $quiz->questions->count() }} questions · Pass ≥ {{ $quiz->passing_score }}% · {{ $quiz->attempts->count() }} attempts</p>
+                            <p class="text-xs text-gray-400 mt-1">
+                                {{ $quiz->questions->count() }} questions · Pass ≥ {{ $quiz->passing_score }}% · {{ $quiz->attempts->count() }} attempts
+                                @if($quiz->duration_minutes) · ⏱ {{ $quiz->duration_minutes }} min@endif
+                                @if($quiz->max_attempts) · {{ $quiz->max_attempts }} attempt limit@endif
+                                @if($quiz->shuffle_questions || $quiz->shuffle_options) · 🔀 randomized@endif
+                            </p>
                         </div>
                     </div>
                     <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">

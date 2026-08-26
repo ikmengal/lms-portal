@@ -160,12 +160,14 @@ class LearnController extends Controller
         ]);
 
         if ($progress >= 100 && !Certificate::where('user_id', auth()->id())->where('course_id', $course->id)->exists()) {
-            Certificate::create([
-                'code' => strtoupper(Str::random(4) . '-' . Str::random(4) . '-' . Str::random(4)),
+            $certificate = Certificate::create([
+                'code' => Certificate::generateCode(),
                 'user_id' => auth()->id(),
                 'course_id' => $course->id,
                 'issued_at' => now(),
             ]);
+
+            \App\Services\Notifier::certificateIssued($certificate);
         }
     }
 

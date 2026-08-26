@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\Quiz;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class QuizController extends Controller
 {
@@ -32,7 +33,7 @@ class QuizController extends Controller
         $this->authorizeCourse($course);
         return view('pages.admin.courses.tests.form', [
             'course' => $course,
-            'quiz' => new Quiz(['type' => 'quiz', 'passing_score' => 60, 'is_active' => true]),
+            'quiz' => new Quiz(['type' => 'quiz', 'passing_score' => 60, 'shuffle_options' => true, 'is_active' => true]),
         ]);
     }
 
@@ -48,6 +49,7 @@ class QuizController extends Controller
             foreach ($questions as $i => $q) {
                 $question = $quiz->questions()->create([
                     'question' => $q['question'],
+                    'type' => $q['type'],
                     'points' => $q['points'],
                     'sort_order' => $i,
                 ]);
@@ -93,6 +95,7 @@ class QuizController extends Controller
             foreach ($questions as $i => $q) {
                 $question = $quiz->questions()->create([
                     'question' => $q['question'],
+                    'type' => $q['type'],
                     'points' => $q['points'],
                     'sort_order' => $i,
                 ]);
@@ -130,8 +133,15 @@ class QuizController extends Controller
             'description' => ['nullable', 'string', 'max:2000'],
             'passing_score' => ['required', 'integer', 'min:1', 'max:100'],
             'duration_minutes' => ['nullable', 'integer', 'min:1', 'max:600'],
+            'max_attempts' => ['nullable', 'integer', 'min:1', 'max:99'],
+            'shuffle_questions' => ['nullable', 'boolean'],
+            'shuffle_options' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
-        ]) + ['is_active' => false];
+        ]) + [
+            'is_active' => false,
+            'shuffle_questions' => false,
+            'shuffle_options' => false,
+        ];
     }
 
     private function normalizedQuestions(Request $request): array
@@ -141,28 +151,59 @@ class QuizController extends Controller
         $questions = collect($raw)
             ->filter(fn ($q) => filled($q['question'] ?? null))
             ->map(function ($q) {
-                $options = collect($q['options'] ?? [])
-                    ->filter(fn ($o) => filled($o['text'] ?? null))
-                    ->values()
-                    ->map(fn ($o) => [
-                        'text' => trim($o['text']),
-                        'is_correct' => !empty($o['is_correct']),
-                    ])
-                    ->all();
+                $type = in_array($q['type'] ?? null, array_keys(\App\Models\QuizQuestion::TYPES), true)
+                    ? $q['type']
+                    : 'multiple_choice';
+
+                // True/False questions always have exactly two fixed options.
+                if ($type === 'true_false') {
+                    $options = [
+                        ['text' => 'True', 'is_correct' => (($q['correct'] ?? '') === 'true')],
+                        ['text' => 'False', 'is_correct' => (($q['correct'] ?? '') === 'false')],
+                    ];
+                } else {
+                    $options = collect($q['options'] ?? [])
+                        ->filter(fn ($o) => filled($o['text'] ?? null))
+                        ->values()
+                        ->map(fn ($o) => [
+                            'text' => trim($o['text']),
+                            'is_correct' => !empty($o['is_correct']),
+                        ])
+                        ->all();
+                }
+
+                $correctCount = collect($options)->where('is_correct', true)->count();
 
                 return [
                     'question' => trim($q['question']),
+                    'type' => $type,
                     'points' => max(1, (int) ($q['points'] ?? 1)),
                     'options' => $options,
+                    'correct_count' => $correctCount,
                 ];
             })
-            ->filter(fn ($q) => count($q['options']) >= 2 && collect($q['options'])->contains('is_correct', true))
+            ->filter(function ($q) {
+                if ($q['type'] === 'true_false') {
+                    return $q['correct_count'] === 1; // must pick True or False
+                }
+
+                if ($q['type'] === 'multiple_answers') {
+                    return count($q['options']) >= 2 && $q['correct_count'] >= 1;
+                }
+
+                return count($q['options']) >= 2 && $q['correct_count'] === 1;
+            })
+            ->map(function ($q) {
+                unset($q['correct_count']);
+
+                return $q;
+            })
             ->values()
             ->all();
 
         if (empty($questions)) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'questions' => 'Each question needs at least 2 options and one marked correct.',
+            throw ValidationException::withMessages([
+                'questions' => 'Add at least one valid question. Each needs 2+ options and the correct answer(s) marked.',
             ]);
         }
 

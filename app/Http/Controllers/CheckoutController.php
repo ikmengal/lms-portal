@@ -98,8 +98,9 @@ class CheckoutController extends Controller
 
         $courses = Course::whereIn('id', $request->input('course_ids'))->get();
 
-        $payments = DB::transaction(function () use ($courses, $method, $validated) {
+        [$payments, $newEnrollments] = DB::transaction(function () use ($courses, $method, $validated) {
             $payments = [];
+            $newEnrollments = [];
 
             foreach ($courses as $course) {
                 $enrollment = Enrollment::firstOrCreate([
@@ -107,6 +108,9 @@ class CheckoutController extends Controller
                     'course_id' => $course->id,
                 ]);
 
+                if ($enrollment->wasRecentlyCreated) {
+                    $newEnrollments[] = $course;
+                }
                 $payment = Payment::updateOrCreate(
                     [
                         'user_id' => Auth::id(),
@@ -127,8 +131,13 @@ class CheckoutController extends Controller
                 $payments[] = $payment;
             }
 
-            return $payments;
+            return [$payments, $newEnrollments];
         });
+
+        // Notify about brand-new enrollments only (not re-purchases).
+        foreach ($newEnrollments as $course) {
+            \App\Services\Notifier::courseEnrolled(Auth::user(), $course);
+        }
 
         // Clear purchased items from the cart
         $remaining = array_diff(session()->get('cart', []), $courses->pluck('id')->all());
@@ -162,10 +171,14 @@ class CheckoutController extends Controller
     {
         abort_if($course->price > 0, 403, 'This course requires payment.');
 
-        Enrollment::firstOrCreate([
+        $enrollment = Enrollment::firstOrCreate([
             'user_id' => Auth::id(),
             'course_id' => $course->id,
         ]);
+
+        if ($enrollment->wasRecentlyCreated) {
+            \App\Services\Notifier::courseEnrolled(Auth::user(), $course);
+        }
 
         if ($request->boolean('from_cart')) {
             session()->put('cart', array_values(array_diff(session()->get('cart', []), [$course->id])));

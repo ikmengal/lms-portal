@@ -109,6 +109,8 @@ class CourseContentController extends Controller
             'sort_order' => (int) $module->lessons()->max('sort_order') + 1,
         ]);
 
+        \App\Services\Notifier::newLesson($module->course, $module->lessons()->latest('id')->first());
+
         return back()->with('success', 'Lesson added successfully.');
     }
 

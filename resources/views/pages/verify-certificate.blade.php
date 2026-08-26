@@ -34,9 +34,15 @@
                         </div>
                         <div class="text-center sm:text-left">
                             <h1 class="text-2xl font-bold text-gray-900">Certificate Verified</h1>
-                            <p class="text-gray-500 mt-1">This certificate is authentic and was issued by LMS Portal.</p>
+                            <p class="text-gray-500 mt-1">This certificate is authentic and was issued by {{ $site['site_name'] ?? 'LMS Portal' }}.</p>
                         </div>
-                        <div class="sm:ml-auto px-4 py-2 bg-secondary-100 text-secondary-800 rounded-lg font-mono text-sm font-semibold">{{ $certificate->code }}</div>
+                        <div class="sm:ml-auto flex items-center gap-4">
+                            <div class="px-4 py-2 bg-secondary-100 text-secondary-800 rounded-lg font-mono text-sm font-semibold">{{ $certificate->code }}</div>
+                            <div class="text-center">
+                                <div class="bg-white border border-gray-200 rounded-lg p-1.5 shadow-sm">{!! qr_svg($certificate->verificationUrl(), 84) !!}</div>
+                                <p class="text-[9px] uppercase tracking-widest text-gray-400 mt-1">Scan to verify</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -113,7 +119,7 @@
 
                 {{-- Note --}}
                 <p class="text-xs text-gray-400 text-center">
-                    Anyone can verify this certificate by visiting <span class="font-mono">{{ url('/verify-certificate/' . $certificate->code) }}</span> and entering the certificate ID.
+                    Anyone can verify this certificate by visiting <span class="font-mono">{{ $certificate->verificationUrl() }}</span> or scanning the QR code above.
                 </p>
             @else
                 {{-- Not Found --}}

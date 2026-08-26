@@ -166,11 +166,17 @@
             </div>
 
             <div class="footer">
-                <p>
-                    Certificate ID: <span class="mono">{{ $certificate->code }}</span>
-                    <span class="sep">|</span>
-                    Verify at: <span class="url">{{ url('/verify-certificate/' . $certificate->code) }}</span>
-                </p>
+                <table style="width: 100%; border-collapse: collapse;"><tr>
+                    <td style="text-align: left; vertical-align: middle;">
+                        Certificate ID: <span class="mono">{{ $certificate->code }}</span>
+                        <span class="sep">|</span>
+                        Verify at: <span class="url">{{ url('/verify-certificate/' . $certificate->code) }}</span>
+                    </td>
+                    <td style="width: 96px; text-align: right; vertical-align: middle; font-size: 0; line-height: 0;">
+                        <span style="display: inline-block; vertical-align: middle; font-size: 8px; color: rgba(255,214,178,.55); padding-right: 6px;">SCAN TO VERIFY</span>
+                        <span style="display: inline-block; background: #ffffff; border-radius: 4px; padding: 3px; vertical-align: middle;">{!! qr_svg($certificate->verificationUrl(), 72) !!}</span>
+                    </td>
+                </tr></table>
             </div>
         </div>
     </body>

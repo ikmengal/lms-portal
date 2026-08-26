@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\LiveClass;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -82,6 +83,11 @@ class Course extends Model
     public function quizzes(): HasMany
     {
         return $this->hasMany(Quiz::class);
+    }
+
+    public function liveClasses(): HasMany
+    {
+        return $this->hasMany(LiveClass::class)->orderBy('scheduled_at');
     }
 
     public function scopeTrashed(Builder $query): Builder

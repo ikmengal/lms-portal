@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\{
     CourseContentController,
+    ContactMessageController,
     PermissionController,
     CategoryController,
     LevelController,
@@ -13,6 +14,7 @@ use App\Http\Controllers\Admin\{
 };
 use App\Http\Controllers\{
     DashboardController,
+    NotificationController,
     ProfileController,
     QuizAttemptController,
     SettingController,
@@ -74,6 +76,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // In-app notifications
+    Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
+
     // Instructor area
     Route::get('/instructor/students', [DashboardController::class, 'students'])->name('instructor.students');
     Route::get('/instructor/earnings', [DashboardController::class, 'earnings'])->name('instructor.earnings');
@@ -117,12 +123,12 @@ Route::middleware('auth')->group(function () {
     // Take Tests (enrolled students)
     Route::get('/courses/{course}/tests/{quiz}', [QuizAttemptController::class, 'show'])->name('courses.tests.show');
     Route::post('/courses/{course}/tests/{quiz}', [QuizAttemptController::class, 'submit'])->name('courses.tests.submit');
+    Route::get('/quiz-history', [QuizAttemptController::class, 'history'])->name('quiz.history');
 });
 
-// Shared Course Management (admins manage all, instructors manage their own)
+    // Shared Course Management (admins manage all, instructors manage their own)
 // Access is ownership-checked inside the controllers.
-Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/courses', [AdminCourseController::class, 'index'])->name('courses.index');
+Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {    Route::get('/courses', [AdminCourseController::class, 'index'])->name('courses.index');
     Route::get('/courses/create', [AdminCourseController::class, 'create'])->name('courses.create');
     Route::post('/courses', [AdminCourseController::class, 'store'])->name('courses.store');
     Route::get('/courses/{course}', [AdminCourseController::class, 'show'])->name('courses.show');
@@ -132,6 +138,13 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     // Course Curriculum (chapters & lessons)
     Route::get('/courses/{course}/curriculum', [CourseContentController::class, 'index'])->name('courses.curriculum');
+
+    // Live Classes
+    Route::get('/courses/{course}/live-classes', [\App\Http\Controllers\Admin\LiveClassController::class, 'index'])->name('courses.live-classes.index');
+    Route::post('/courses/{course}/live-classes', [\App\Http\Controllers\Admin\LiveClassController::class, 'store'])->name('courses.live-classes.store');
+    Route::put('/courses/{course}/live-classes/{liveClass}', [\App\Http\Controllers\Admin\LiveClassController::class, 'update'])->name('courses.live-classes.update');
+    Route::delete('/courses/{course}/live-classes/{liveClass}', [\App\Http\Controllers\Admin\LiveClassController::class, 'destroy'])->name('courses.live-classes.destroy');
+
     Route::post('/courses/{course}/modules', [CourseContentController::class, 'storeModule'])->name('modules.store');
     Route::put('/modules/{module}', [CourseContentController::class, 'updateModule'])->name('modules.update');
     Route::post('/modules/{module}/move', [CourseContentController::class, 'moveModule'])->name('modules.move');
@@ -153,6 +166,16 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
 // Admin Routes
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Analytics Dashboard
+    Route::get('/analytics', [\App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('analytics');
+
+    // Contact Messages Inbox
+    Route::controller(ContactMessageController::class)->prefix('messages')->name('messages.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/{message}/toggle-read', 'toggleRead')->name('toggle');
+        Route::delete('/{message}', 'destroy')->name('destroy');
+    });
+
     // Manage Users
     Route::controller(UserController::class)->group(function () {
         Route::get('/users', 'index')->name('users');

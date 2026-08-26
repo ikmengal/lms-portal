@@ -51,7 +51,12 @@ class DashboardController extends Controller
 
         $recentUsers = \App\Models\User::latest()->take(8)->get();
 
-        return view('pages.admin.dashboard', compact('stats', 'recentUsers'));
+        $recentMessages = \App\Models\ContactMessage::latest()->take(4)->get();
+        $unreadMessages = \App\Models\ContactMessage::where('is_read', false)->count();
+
+        return view('pages.admin.dashboard', compact(
+            'stats', 'recentUsers', 'recentMessages', 'unreadMessages'
+        ));
     }
 
     private function instructorDashboard()

@@ -11,7 +11,13 @@ class QuizQuestion extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['quiz_id', 'question', 'points', 'sort_order'];
+    public const TYPES = [
+        'multiple_choice' => 'Multiple Choice (single answer)',
+        'true_false' => 'True / False',
+        'multiple_answers' => 'Multiple Answers (one or more)',
+    ];
+
+    protected $fillable = ['quiz_id', 'question', 'type', 'points', 'sort_order'];
 
     public function quiz(): BelongsTo
     {
@@ -21,5 +27,10 @@ class QuizQuestion extends Model
     public function options(): HasMany
     {
         return $this->hasMany(QuizOption::class);
+    }
+
+    public function isMultiAnswer(): bool
+    {
+        return $this->type === 'multiple_answers';
     }
 }

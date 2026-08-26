@@ -29,3 +29,17 @@ if (! function_exists('setting_image')) {
         return $value ? asset('storage/' . ltrim($value, '/')) : null;
     }
 }
+
+if (! function_exists('qr_svg')) {
+    /**
+     * Inline SVG QR code (works in browsers and dompdf PDFs via php-svg-lib).
+     */
+    function qr_svg(string $data, int $size = 100): string
+    {
+        return preg_replace(
+            '/<\?xml[^>]*\?>/',
+            '',
+            \SimpleSoftwareIO\QrCode\Facades\QrCode::size($size)->margin(0)->errorCorrection('M')->generate($data)
+        );
+    }
+}

@@ -45,7 +45,17 @@ class PageController extends Controller
             'message.min' => 'Your message must be at least 10 characters.',
         ]);
 
-        ContactMessage::create($validated);
+        $message = ContactMessage::create($validated);
+
+        // Notify every admin via email + in-app notification.
+        try {
+            \Illuminate\Support\Facades\Notification::send(
+                User::role('admin')->get(),
+                new \App\Notifications\NewContactMessageNotification($message)
+            );
+        } catch (\Throwable $e) {
+            report($e); // Never block the contact form because of a mail failure.
+        }
 
         return back()->with('success', 'Thanks for reaching out! Our team will get back to you within 24 hours.');
     }

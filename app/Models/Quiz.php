@@ -24,6 +24,9 @@ class Quiz extends Model
         'description',
         'passing_score',
         'duration_minutes',
+        'max_attempts',
+        'shuffle_questions',
+        'shuffle_options',
         'is_active',
     ];
 
@@ -31,6 +34,8 @@ class Quiz extends Model
     {
         return [
             'is_active' => 'boolean',
+            'shuffle_questions' => 'boolean',
+            'shuffle_options' => 'boolean',
         ];
     }
 
@@ -52,6 +57,23 @@ class Quiz extends Model
     public function totalPoints(): int
     {
         return (int) $this->questions->sum('points');
+    }
+
+    public function completedAttemptsFor(int $userId): int
+    {
+        return $this->attempts()
+            ->where('user_id', $userId)
+            ->whereNotNull('completed_at')
+            ->count();
+    }
+
+    public function attemptsLeftFor(int $userId): ?int
+    {
+        if (empty($this->max_attempts)) {
+            return null; // unlimited
+        }
+
+        return max(0, $this->max_attempts - $this->completedAttemptsFor($userId));
     }
 
     public function bestAttemptFor(int $userId): ?QuizAttempt

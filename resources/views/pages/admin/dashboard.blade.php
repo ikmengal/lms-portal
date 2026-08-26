@@ -3,12 +3,16 @@
 @section('content')
     <div class="space-y-8">
         {{-- Header --}}
-        <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center gap-4">
             <x-avatar :user="auth()->user()" size="w-12 h-12 text-lg" />
-            <div>
+            <div class="flex-1 min-w-0">
                 <h1 class="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
                 <p class="text-gray-500 mt-1">Welcome back, {{ auth()->user()->name }}. Here's what's happening on your platform.</p>
             </div>
+            <a href="{{ route('admin.analytics') }}" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition shadow-sm whitespace-nowrap">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"/></svg>
+                View Analytics
+            </a>
         </div>
 
         {{-- Stats Grid --}}
@@ -133,6 +137,36 @@
 
             {{-- Quick Actions & Role Breakdown --}}
             <div class="space-y-6">
+                {{-- Contact Messages --}}
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-900">Contact Messages</h2>
+                        @if($unreadMessages > 0)
+                            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-600">{{ $unreadMessages }} new</span>
+                        @endif
+                    </div>
+                    <div class="space-y-3">
+                        @forelse($recentMessages as $msg)
+                            <a href="{{ route('admin.messages.index') }}" class="flex items-start gap-3 p-3 rounded-lg border border-gray-50 hover:border-primary-200 hover:bg-primary-50/40 transition">
+                                <span class="w-8 h-8 shrink-0 rounded-full grid place-items-center text-[10px] font-bold {{ $msg->is_read ? 'bg-gray-100 text-gray-500' : 'bg-primary-600 text-white' }}">{{ strtoupper(substr($msg->name, 0, 2)) }}</span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block text-sm font-medium text-gray-900 truncate">{{ $msg->subject }}</span>
+                                    <span class="block text-xs text-gray-400 truncate">{{ $msg->name }} · {{ $msg->created_at->diffForHumans() }}</span>
+                                </span>
+                                @if(!$msg->is_read)
+                                    <span class="w-2 h-2 bg-red-500 rounded-full mt-1.5 shrink-0"></span>
+                                @endif
+                            </a>
+                        @empty
+                            <p class="text-sm text-gray-400 py-2">No messages yet.</p>
+                        @endforelse
+                    </div>
+                    <a href="{{ route('admin.messages.index') }}" class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 hover:text-primary-700 transition">
+                        View All Messages
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                    </a>
+                </div>
+
                 {{-- Quick Actions --}}
                 <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>

@@ -11,6 +11,7 @@
                 <h1 class="text-2xl font-bold text-gray-900 truncate">Curriculum</h1>
                 <p class="text-gray-500 mt-0.5 truncate">{{ $course->title }} · {{ $course->modules->count() }} chapters · {{ $totalLessons }} lessons</p>
             </div>
+            <a href="{{ route('admin.courses.live-classes.index', $course) }}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition">Live Classes</a>
             <a href="{{ route('admin.courses.tests.index', $course) }}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg transition">Tests & Exams</a>
         </div>
 

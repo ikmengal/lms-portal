@@ -52,19 +52,49 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Passing Score (%) <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Passing Percentage (%) <span class="text-red-500">*</span></label>
                         <input type="number" name="passing_score" value="{{ old('passing_score', $quiz->passing_score) }}" required min="1" max="100"
                             class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm transition @error('passing_score') border-red-300 @enderror" />
+                        <p class="mt-1 text-xs text-gray-400">Students score at or above this % to pass.</p>
                         @error('passing_score')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
-                        <input type="number" name="duration_minutes" value="{{ old('duration_minutes', $quiz->duration_minutes) }}" min="1" max="600" placeholder="Optional"
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Timer — Duration (minutes)</label>
+                        <input type="number" name="duration_minutes" value="{{ old('duration_minutes', $quiz->duration_minutes) }}" min="1" max="600" placeholder="No limit"
                             class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm transition @error('duration_minutes') border-red-300 @enderror" />
+                        <p class="mt-1 text-xs text-gray-400">Countdown starts when a student opens the test and auto-submits at zero.</p>
                     </div>
 
-                    <div class="flex items-end pb-1">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Attempts Limit</label>
+                        <input type="number" name="max_attempts" value="{{ old('max_attempts', $quiz->max_attempts) }}" min="1" max="99" placeholder="Unlimited"
+                            class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm transition @error('max_attempts') border-red-300 @enderror" />
+                        <p class="mt-1 text-xs text-gray-400">Leave empty for unlimited attempts.</p>
+                    </div>
+
+                    <div class="sm:col-span-2 grid sm:grid-cols-2 gap-3 pt-1">
+                        <label class="flex items-center gap-3 p-3.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-primary-50/40 has-[:checked]:border-primary-400 has-[:checked]:bg-primary-50/60 transition">
+                            <input type="hidden" name="shuffle_questions" value="0">
+                            <input type="checkbox" name="shuffle_questions" value="1" {{ old('shuffle_questions', $quiz->shuffle_questions) ? 'checked' : '' }}
+                                class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 transition" />
+                            <span>
+                                <span class="block text-sm font-medium text-gray-700">Randomize Questions</span>
+                                <span class="block text-xs text-gray-400">Shuffle question order for every attempt</span>
+                            </span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-primary-50/40 has-[:checked]:border-primary-400 has-[:checked]:bg-primary-50/60 transition">
+                            <input type="hidden" name="shuffle_options" value="0">
+                            <input type="checkbox" name="shuffle_options" value="1" {{ old('shuffle_options', $quiz->shuffle_options ?? true) ? 'checked' : '' }}
+                                class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 transition" />
+                            <span>
+                                <span class="block text-sm font-medium text-gray-700">Randomize Answer Options</span>
+                                <span class="block text-xs text-gray-400">Shuffle answer order for every attempt</span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="sm:col-span-2 flex items-center">
                         <label class="inline-flex items-center gap-3 cursor-pointer">
                             <input type="checkbox" name="is_active" value="1" {{ old('is_active', $quiz->is_active) ? 'checked' : '' }}
                                 class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 transition" />
@@ -104,45 +134,84 @@
                         <textarea :name="`questions[${qi}][question]`" x-model="q.question" rows="2" maxlength="1000" required
                             placeholder="Question text..." class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm transition"></textarea>
 
-                        <div class="flex items-center gap-2 mt-2 mb-4">
-                            <label class="text-xs font-medium text-gray-500">Points:</label>
-                            <input type="number" :name="`questions[${qi}][points]`" x-model.number="q.points" min="1" max="100"
-                                class="w-20 px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
+                        <div class="flex flex-wrap items-end gap-3 mt-2 mb-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Question Type</label>
+                                <select :name="`questions[${qi}][type]`" x-model="q.type" @change="setType(qi)"
+                                    class="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition">
+                                    <option value="multiple_choice">Multiple Choice</option>
+                                    <option value="true_false">True / False</option>
+                                    <option value="multiple_answers">Multiple Answers</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Points</label>
+                                <input type="number" :name="`questions[${qi}][points]`" x-model.number="q.points" min="1" max="100"
+                                    class="w-20 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
+                            </div>
+                            <span x-show="q.type === 'multiple_answers'" class="text-xs text-accent-700 bg-accent-50 border border-accent-100 rounded-lg px-2.5 py-1.5">Student must select ALL correct answers</span>
                         </div>
 
-                        {{-- Options --}}
-                        <div class="space-y-2">
-                            <template x-for="(opt, oi) in q.options" :key="oi">
-                                <div class="flex items-center gap-2">
-                                    <button type="button" @click="setCorrect(qi, oi)" :title="opt.is_correct ? 'Correct answer' : 'Mark as correct'"
-                                        class="shrink-0 w-8 h-8 rounded-lg border flex items-center justify-center transition"
-                                        :class="opt.is_correct ? 'bg-secondary-50 border-secondary-400 text-secondary-600' : 'bg-white border-gray-200 text-gray-300 hover:border-secondary-300 hover:text-secondary-400'">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                        {{-- True/False --}}
+                        <template x-if="q.type === 'true_false'">
+                            <div class="space-y-2 pl-10">
+                                <p class="text-xs font-medium text-gray-500 mb-1">Select the correct answer:</p>
+                                <input type="hidden" :name="`questions[${qi}][correct]`" :value="q.correct">
+                                <div class="grid grid-cols-2 gap-2 max-w-sm">
+                                    <button type="button" @click="setTrueFalse(qi, 'true')"
+                                        class="p-3 rounded-lg border text-sm font-semibold transition"
+                                        :class="q.correct === 'true' ? 'bg-secondary-50 border-secondary-400 text-secondary-700' : 'bg-white border-gray-200 text-gray-600 hover:border-secondary-300'">
+                                        TRUE
                                     </button>
-                                    <input type="hidden" :name="`questions[${qi}][options][${oi}][is_correct]`" value="0">
-                                    <input type="checkbox" :name="`questions[${qi}][options][${oi}][is_correct]`" value="1" x-model.boolean="opt.is_correct" class="hidden">
-                                    <input type="text" :name="`questions[${qi}][options][${oi}][text]`" x-model="opt.text" maxlength="500"
-                                        placeholder="Option text..." class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition" />
-                                    <button type="button" @click="removeOption(qi, oi)"
-                                        class="shrink-0 p-1.5 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Remove option">
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    <button type="button" @click="setTrueFalse(qi, 'false')"
+                                        class="p-3 rounded-lg border text-sm font-semibold transition"
+                                        :class="q.correct === 'false' ? 'bg-secondary-50 border-secondary-400 text-secondary-700' : 'bg-white border-gray-200 text-gray-600 hover:border-secondary-300'">
+                                        FALSE
                                     </button>
                                 </div>
-                            </template>
-                            <button type="button" @click="addOption(qi)"
-                                class="text-xs font-medium text-primary-600 hover:text-primary-700 inline-flex items-center gap-1 pl-10 pt-1">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                                Add Option
-                            </button>
-                        </div>
-                        <p class="text-xs text-gray-400 mt-3 pl-10">Click the checkmark next to an option to mark it correct.</p>
+                            </div>
+                        </template>
+
+                        {{-- MCQ & Multiple answers --}}
+                        <template x-if="q.type !== 'true_false'">
+                            <div class="space-y-2">
+                                <template x-for="(opt, oi) in q.options" :key="oi">
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" @click="setCorrect(qi, oi)" :title="opt.is_correct ? 'Correct answer' : 'Mark as correct'"
+                                            class="shrink-0 w-8 h-8 rounded-lg border flex items-center justify-center transition"
+                                            :class="opt.is_correct ? 'bg-secondary-50 border-secondary-400 text-secondary-600' : 'bg-white border-gray-200 text-gray-300 hover:border-secondary-300 hover:text-secondary-400'">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                        </button>
+                                        <input type="hidden" :name="`questions[${qi}][options][${oi}][is_correct]`" value="0">
+                                        <input type="checkbox" :name="`questions[${qi}][options][${oi}][is_correct]`" value="1" x-model.boolean="opt.is_correct" class="hidden">
+                                        <input type="text" :name="`questions[${qi}][options][${oi}][text]`" x-model="opt.text" maxlength="500"
+                                            placeholder="Option text..." class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition" />
+                                        <button type="button" @click="removeOption(qi, oi)"
+                                            class="shrink-0 p-1.5 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Remove option">
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                    </div>
+                                </template>
+                                <button type="button" @click="addOption(qi)" x-show="q.options.length < 8"
+                                    class="text-xs font-medium text-primary-600 hover:text-primary-700 inline-flex items-center gap-1 pl-10 pt-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                    Add Option
+                                </button>
+                            </div>
+                        </template>
+
+                        <p class="text-xs text-gray-400 mt-3 pl-10">
+                            <span x-show="q.type === 'multiple_choice'">Click the checkmark to mark THE one correct option.</span>
+                            <span x-show="q.type === 'multiple_answers'">Click checkmarks to mark ALL correct options (one or more).</span>
+                            <span x-show="q.type === 'true_false'">Pick whether the statement is true or false.</span>
+                        </p>
                     </div>
                 </template>
 
                 <div x-show="!questions.length" class="border border-dashed border-gray-200 rounded-xl p-10 text-center">
-                    <svg class="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/></svg>
+                    <svg class="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
                     <p class="text-sm font-medium text-gray-500">No questions yet</p>
-                    <p class="text-sm text-gray-400 mt-1">Each question needs at least 2 options and one marked correct.</p>
+                    <p class="text-sm text-gray-400 mt-1">Add multiple choice, true/false or multi-answer questions.</p>
                 </div>
             </div>
 
@@ -162,19 +231,25 @@
                 questions: @js($quiz->relationLoaded('questions')
                     ? $quiz->questions->sortBy('sort_order')->values()->map(fn ($q) => [
                         'question' => $q->question,
+                        'type' => $q->type ?? 'multiple_choice',
                         'points' => (int) $q->points,
                         'options' => $q->options->values()->map(fn ($o) => [
                             'text' => $o->option_text,
                             'is_correct' => (bool) $o->is_correct,
                         ])->all(),
+                        'correct' => (($q->type ?? '') === 'true_false'
+                            ? optional($q->options->firstWhere('is_correct', true))->option_text === 'True' ? 'true' : 'false'
+                            : ''),
                     ])->all()
                     : []),
 
                 addQuestion() {
                     this.questions.push({
                         question: '',
+                        type: 'multiple_choice',
                         points: 1,
                         options: [{ text: '', is_correct: false }, { text: '', is_correct: false }],
+                        correct: '',
                     });
                 },
 
@@ -182,7 +257,26 @@
                     this.questions.splice(i, 1);
                 },
 
+                setType(qi) {
+                    const q = this.questions[qi];
+                    if (q.type === 'true_false') {
+                        q.correct = '';
+                        q.options = [
+                            { text: 'True', is_correct: false },
+                            { text: 'False', is_correct: false },
+                        ];
+                    } else if (q.options.length === 2 && q.options[0].text === 'True' && q.options[1].text === 'False') {
+                        q.correct = '';
+                        q.options = [{ text: '', is_correct: false }, { text: '', is_correct: false }];
+                    }
+                },
+
+                setTrueFalse(qi, val) {
+                    this.questions[qi].correct = val;
+                },
+
                 addOption(qi) {
+                    if (this.questions[qi].options.length >= 8) return;
                     this.questions[qi].options.push({ text: '', is_correct: false });
                 },
 
@@ -191,9 +285,16 @@
                 },
 
                 setCorrect(qi, oi) {
-                    const wasCorrect = this.questions[qi].options[oi].is_correct;
-                    this.questions[qi].options.forEach((o) => (o.is_correct = false));
-                    this.questions[qi].options[oi].is_correct = !wasCorrect;
+                    const q = this.questions[qi];
+                    // Single-answer modes: only one option may be correct.
+                    if (q.type !== 'multiple_answers') {
+                        const wasCorrect = q.options[oi].is_correct;
+                        q.options.forEach((o) => (o.is_correct = false));
+                        q.options[oi].is_correct = !wasCorrect;
+                        return;
+                    }
+                    // Multi-answer mode: toggle independently (requires at least one).
+                    q.options[oi].is_correct = !q.options[oi].is_correct;
                 },
             };
         }
