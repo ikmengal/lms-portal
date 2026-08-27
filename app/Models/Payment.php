@@ -24,6 +24,9 @@ class Payment extends Model
         'amount',
         'currency',
         'method',
+        'coupon_id',
+        'discount_amount',
+        'final_amount',
         'transaction_ref',
         'status',
         'payer_info',
@@ -34,6 +37,8 @@ class Payment extends Model
     {
         return [
             'payer_info' => 'array',
+            'discount_amount' => 'decimal:2',
+            'final_amount' => 'decimal:2',
             'paid_at' => 'datetime',
         ];
     }
@@ -46,6 +51,11 @@ class Payment extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
+    }
+
+    public function coupon(): BelongsTo
+    {
+        return $this->belongsTo(Coupon::class);
     }
 
     public function methodLabel(): string

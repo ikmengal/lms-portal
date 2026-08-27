@@ -1,9 +1,6 @@
 @extends('emails.layout')
-
 @section('title', $isResend ?? false ? 'Activate Your Account' : 'Welcome')
-
 @section('preheader', 'Activate your '.\App\Support\Brand::data()['name'].' account to get started.')
-
 @section('content')
     <h1 style="margin:0 0 16px 0; font-size:22px; line-height:30px; font-weight:bold; color:{{ $brand['textDark'] }};">
         @if($isResend ?? false)

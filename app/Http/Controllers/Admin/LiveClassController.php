@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\LiveClass;
+use App\Models\LiveClassAttendance;
 use App\Services\Notifier;
 use Illuminate\Http\Request;
 
@@ -66,6 +67,25 @@ class LiveClassController extends Controller
         $liveClass->delete();
 
         return back()->with('success', 'Live class removed.');
+    }
+
+    public function attendance(Course $course, LiveClass $liveClass)
+    {
+        $this->authorizeCourse($course);
+        abort_unless($liveClass->course_id === $course->id, 404);
+
+        $liveClass->load(['attendances.user', 'course.enrollments.user']);
+
+        $enrolledStudents = $course->enrollments()->with('user')->get()->pluck('user');
+        $attendedStudentIds = $liveClass->attendances->pluck('user_id');
+        $absentStudents = $enrolledStudents->reject(fn ($u) => $attendedStudentIds->contains($u->id));
+
+        return view('pages.admin.courses.live-class-attendance', [
+            'course' => $course,
+            'class' => $liveClass,
+            'attended' => $liveClass->attendances,
+            'absent' => $absentStudents,
+        ]);
     }
 
     private function validated(Request $request): array

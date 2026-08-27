@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Coupon;
+use App\Models\CouponUsage;
 use App\Models\Enrollment;
 use App\Models\Payment;
+use App\Support\ContentDrip;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +18,14 @@ class CheckoutController extends Controller
 
     public function addToCart(Request $request, Course $course)
     {
+        if (ContentDrip::courseComingSoon($course)) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'This course is coming soon and cannot be added to your cart yet.'], 403);
+            }
+
+            return back()->with('error', 'This course opens on ' . $course->unlocks_at->format('M j, Y') . ' and cannot be purchased yet.');
+        }
+
         $cart = session()->get('cart', []);
 
         if (! in_array($course->id, $cart)) {
@@ -54,9 +65,30 @@ class CheckoutController extends Controller
                 ->with('success', 'You are already enrolled in this course.');
         }
 
+        if (ContentDrip::courseComingSoon($course)) {
+            return redirect()->route('courses.show', $course)
+                ->with('error', 'This course opens on ' . $course->unlocks_at->format('M j, Y') . '. Enrollment is not available yet.');
+        }
+
+        $subtotal = $course->price;
+        $discount = 0;
+        $couponCode = session('applied_coupon');
+
+        if ($couponCode) {
+            $coupon = Coupon::where('code', $couponCode)->first();
+            if ($coupon && $coupon->isValid()) {
+                $discount = $coupon->calculateDiscount($subtotal);
+            } else {
+                session()->forget('applied_coupon');
+            }
+        }
+
         return view('pages.checkout', [
             'items' => collect([$course]),
             'isCart' => false,
+            'subtotal' => $subtotal,
+            'discount' => $discount,
+            'total' => max(0, $subtotal - $discount),
         ]);
     }
 
@@ -68,9 +100,31 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
+        $notYetOpen = $items->first(fn ($c) => ContentDrip::courseComingSoon($c));
+        if ($notYetOpen) {
+            return redirect()->route('cart.index')
+                ->with('error', '"' . $notYetOpen->title . '" opens on ' . $notYetOpen->unlocks_at->format('M j, Y') . ' and cannot be purchased yet.');
+        }
+
+        $subtotal = $items->sum('price');
+        $discount = 0;
+        $couponCode = session('applied_coupon');
+
+        if ($couponCode) {
+            $coupon = Coupon::where('code', $couponCode)->first();
+            if ($coupon && $coupon->isValid()) {
+                $discount = $coupon->calculateDiscount($subtotal);
+            } else {
+                session()->forget('applied_coupon');
+            }
+        }
+
         return view('pages.checkout', [
             'items' => $items,
             'isCart' => true,
+            'subtotal' => $subtotal,
+            'discount' => $discount,
+            'total' => max(0, $subtotal - $discount),
         ]);
     }
 
@@ -98,7 +152,40 @@ class CheckoutController extends Controller
 
         $courses = Course::whereIn('id', $request->input('course_ids'))->get();
 
-        [$payments, $newEnrollments] = DB::transaction(function () use ($courses, $method, $validated) {
+        $notYetOpen = $courses->first(fn ($c) => ContentDrip::courseComingSoon($c));
+        abort_if(
+            $notYetOpen !== null,
+            403,
+            $notYetOpen
+                ? 'This course opens on ' . $notYetOpen->unlocks_at->format('M j, Y') . ' and cannot be purchased yet.'
+                : 'This course is not available for purchase yet.'
+        );
+
+        // Resolve coupon
+        $coupon = null;
+        $couponCode = session('applied_coupon');
+        if ($couponCode) {
+            $coupon = Coupon::where('code', $couponCode)->first();
+            if (!$coupon || !$coupon->isValid()) {
+                $coupon = null;
+                session()->forget('applied_coupon');
+            }
+        }
+
+        $subtotal = (float) $courses->sum('price');
+        $totalDiscount = $coupon ? $coupon->calculateDiscount($subtotal) : 0;
+        $finalTotal = max(0, $subtotal - $totalDiscount);
+
+        // Per-course discount split proportionally
+        $discountPerCourse = [];
+        if ($totalDiscount > 0 && $subtotal > 0) {
+            foreach ($courses as $course) {
+                $ratio = (float) $course->price / $subtotal;
+                $discountPerCourse[$course->id] = round($totalDiscount * $ratio, 2);
+            }
+        }
+
+        [$payments, $newEnrollments] = DB::transaction(function () use ($courses, $method, $validated, $coupon, $discountPerCourse) {
             $payments = [];
             $newEnrollments = [];
 
@@ -111,6 +198,10 @@ class CheckoutController extends Controller
                 if ($enrollment->wasRecentlyCreated) {
                     $newEnrollments[] = $course;
                 }
+
+                $courseDiscount = $discountPerCourse[$course->id] ?? 0;
+                $courseFinal = max(0, (float) $course->price - $courseDiscount);
+
                 $payment = Payment::updateOrCreate(
                     [
                         'user_id' => Auth::id(),
@@ -121,6 +212,9 @@ class CheckoutController extends Controller
                         'amount' => $course->price,
                         'currency' => 'USD',
                         'method' => $method,
+                        'coupon_id' => $coupon?->id,
+                        'discount_amount' => $courseDiscount,
+                        'final_amount' => $courseFinal,
                         'transaction_ref' => Payment::generateTransactionRef(),
                         'status' => 'paid',
                         'payer_info' => $this->maskedPayerInfo($method, $validated),
@@ -131,15 +225,28 @@ class CheckoutController extends Controller
                 $payments[] = $payment;
             }
 
+            // Record coupon usage
+            if ($coupon && $totalDiscount > 0) {
+                CouponUsage::create([
+                    'coupon_id' => $coupon->id,
+                    'user_id' => Auth::id(),
+                    'payment_id' => $payments[0]->id,
+                    'discount_amount' => $totalDiscount,
+                ]);
+                $coupon->increment('used_count');
+            }
+
             return [$payments, $newEnrollments];
         });
 
         // Notify about brand-new enrollments only (not re-purchases).
         foreach ($newEnrollments as $course) {
             \App\Services\Notifier::courseEnrolled(Auth::user(), $course);
+            \App\Services\GamificationService::recordFirstEnrollment(Auth::user());
         }
 
-        // Clear purchased items from the cart
+        // Clear applied coupon and purchased items from cart
+        session()->forget('applied_coupon');
         $remaining = array_diff(session()->get('cart', []), $courses->pluck('id')->all());
         session()->put('cart', array_values($remaining));
 
@@ -165,11 +272,52 @@ class CheckoutController extends Controller
         return view('pages.receipt', compact('payment', 'relatedPayments', 'total'));
     }
 
+    // ---------------- Coupon ----------------
+
+    public function applyCoupon(Request $request)
+    {
+        $request->validate(['coupon_code' => 'required|string']);
+
+        $coupon = Coupon::where('code', strtoupper($request->input('coupon_code')))->first();
+
+        if (!$coupon || !$coupon->isValid()) {
+            return back()->with('coupon_error', 'Invalid or expired coupon code.');
+        }
+
+        if ($coupon->isUsedBy(Auth::id())) {
+            return back()->with('coupon_error', 'You have already used this coupon.');
+        }
+
+        $subtotal = $this->cartSubtotal();
+        if ($coupon->min_purchase > 0 && $subtotal < $coupon->min_purchase) {
+            return back()->with('coupon_error', 'Minimum purchase of $' . number_format($coupon->min_purchase, 2) . ' required for this coupon.');
+        }
+
+        $discount = $coupon->calculateDiscount($subtotal);
+        session()->put('applied_coupon', $coupon->code);
+
+        return back()->with('coupon_success', "Coupon \"{$coupon->code}\" applied! You save $" . number_format($discount, 2) . '.');
+    }
+
+    public function removeCoupon()
+    {
+        session()->forget('applied_coupon');
+        return back()->with('success', 'Coupon removed.');
+    }
+
+    private function cartSubtotal(): float
+    {
+        $cartIds = session()->get('cart', []);
+        if (empty($cartIds)) return 0;
+        return (float) Course::whereIn('id', $cartIds)->sum('price');
+    }
+
     // ---------------- Free enrollment ----------------
 
     public function enrollFree(Request $request, Course $course)
     {
         abort_if($course->price > 0, 403, 'This course requires payment.');
+        abort_if(ContentDrip::courseComingSoon($course), 403, 'This course is not available for enrollment yet.');
 
         $enrollment = Enrollment::firstOrCreate([
             'user_id' => Auth::id(),

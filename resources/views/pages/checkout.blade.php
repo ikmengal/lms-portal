@@ -1,7 +1,10 @@
 @extends('layouts.app')
 
 @php
-    $total = $items->sum('price');
+    $subtotal = $subtotal ?? $items->sum('price');
+    $discount = $discount ?? 0;
+    $total = $total ?? max(0, $subtotal - $discount);
+    $appliedCoupon = session('applied_coupon');
     $methods = \App\Models\Payment::METHODS;
 @endphp
 
@@ -14,6 +17,13 @@
             {{ $isCart ? 'You are checking out your cart items.' : 'Complete your enrollment below.' }}
             <span class="inline-flex items-center gap-1 ml-2 px-2 py-0.5 bg-accent-50 text-accent-700 text-xs font-semibold rounded-full">Test mode — no real money is charged</span>
         </p>
+
+        @if(session('coupon_error'))
+            <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{{ session('coupon_error') }}</div>
+        @endif
+        @if(session('coupon_success'))
+            <div class="mb-4 p-3 bg-secondary-50 border border-secondary-200 rounded-lg text-sm text-secondary-700">{{ session('coupon_success') }}</div>
+        @endif
 
         <form method="POST" action="{{ route('checkout.process') }}">
             @csrf
@@ -131,7 +141,7 @@
                                 <div class="flex gap-3 items-start">
                                     <div class="w-20 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-primary-100 to-primary-200 shrink-0">
                                         @if($item->thumbnail)
-                                            <img src="{{ asset('storage/' . $item->thumbnail) }}" alt="" class="w-full h-full object-cover">
+                                            <img src="{{ asset('assets/upload/' . $item->thumbnail) }}" alt="" class="w-full h-full object-cover">
                                         @endif
                                     </div>
                                     <div class="min-w-0 flex-1">
@@ -143,10 +153,36 @@
                             @endforeach
                         </div>
 
+                        {{-- Coupon Input --}}
+                        <div class="border-t border-gray-100 pt-4 mb-4">
+                            @if($appliedCoupon)
+                                <div class="flex items-center justify-between bg-secondary-50 border border-secondary-200 rounded-lg px-3 py-2">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <span class="text-sm font-semibold text-secondary-700">{{ $appliedCoupon }}</span>
+                                    </div>
+                                    <a href="{{ route('checkout.remove-coupon') }}" class="text-xs text-red-500 hover:text-red-700 font-medium">Remove</a>
+                                </div>
+                            @else
+                                <form method="POST" action="{{ route('checkout.apply-coupon') }}" class="flex gap-2">
+                                    @csrf
+                                    <input type="text" name="coupon_code" placeholder="Coupon code" class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition uppercase" maxlength="30">
+                                    <button type="submit" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition">Apply</button>
+                                </form>
+                            @endif
+                        </div>
+
                         <div class="border-t border-gray-100 pt-4 space-y-2 text-sm mb-5">
-                            <div class="flex justify-between text-gray-600"><span>Subtotal</span><span>${{ number_format($total, 2) }}</span></div>
-                            <div class="flex justify-between text-gray-600"><span>Discounts</span><span class="text-secondary-600">$0.00</span></div>
-                            <div class="flex justify-between text-base font-bold text-gray-900"><span>Total Due</span><span>${{ number_format($total, 2) }}</span></div>
+                            <div class="flex justify-between text-gray-600"><span>Subtotal</span><span>${{ number_format($subtotal, 2) }}</span></div>
+                            @if($discount > 0)
+                                <div class="flex justify-between text-secondary-600 font-medium">
+                                    <span>Discount</span>
+                                    <span>-${{ number_format($discount, 2) }}</span>
+                                </div>
+                            @else
+                                <div class="flex justify-between text-gray-600"><span>Discount</span><span>$0.00</span></div>
+                            @endif
+                            <div class="flex justify-between text-base font-bold text-gray-900 border-t border-gray-100 pt-2"><span>Total Due</span><span>${{ number_format($total, 2) }}</span></div>
                         </div>
 
                         <button type="submit"

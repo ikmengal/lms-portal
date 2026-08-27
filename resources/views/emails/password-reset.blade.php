@@ -1,9 +1,6 @@
 @extends('emails.layout')
-
 @section('title', 'Reset Password')
-
 @section('preheader', 'Use this link to reset your '.\App\Support\Brand::data()['name'].' password. Expires in '.$minutes.' minutes.')
-
 @section('content')
     <h1 style="margin:0 0 16px 0; font-size:22px; line-height:30px; font-weight:bold; color:{{ $brand['textDark'] }};">
         Reset Your Password

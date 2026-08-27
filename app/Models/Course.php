@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasLocalizedFields;
 use App\Models\LiveClass;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,18 +13,28 @@ use Illuminate\Database\Eloquent\Model;
 class Course extends Model
 {
     use SoftDeletes;
+    use HasLocalizedFields;
 
     protected $fillable = [
         'title',
+        'subtitle',
         'slug',
         'description',
         'course_category_id',
         'course_level_id',
         'duration_hours',
         'language',
+        'language_code',
+        'translations',
+        'unlocks_at',
         'price',
         'thumbnail',
         'instructor_id',
+    ];
+
+    protected $casts = [
+        'translations' => 'array',
+        'unlocks_at' => 'datetime',
     ];
 
     public function getRouteKeyName(): string
@@ -88,6 +99,11 @@ class Course extends Model
     public function liveClasses(): HasMany
     {
         return $this->hasMany(LiveClass::class)->orderBy('scheduled_at');
+    }
+
+    public function discussions(): HasMany
+    {
+        return $this->hasMany(Discussion::class);
     }
 
     public function scopeTrashed(Builder $query): Builder

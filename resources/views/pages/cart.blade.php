@@ -19,7 +19,7 @@
                     <div class="p-5 flex items-center gap-4">
                         <div class="w-24 h-16 rounded-lg overflow-hidden bg-gradient-to-br from-primary-100 to-primary-200 shrink-0">
                             @if($course->thumbnail)
-                                <img src="{{ asset('storage/' . $course->thumbnail) }}" alt="{{ $course->title }}" class="w-full h-full object-cover">
+                                <img src="{{ asset('assets/upload/' . $course->thumbnail) }}" alt="{{ $course->title }}" class="w-full h-full object-cover">
                             @endif
                         </div>
                         <div class="min-w-0 flex-1">

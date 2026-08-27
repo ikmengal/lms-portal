@@ -127,6 +127,53 @@
             </div>
         </div>
 
+        {{-- Gamification Widget --}}
+        <div class="bg-gradient-to-r from-primary-50 to-secondary-50 border border-primary-100 rounded-2xl p-5">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center gap-6 flex-wrap">
+                    {{-- XP --}}
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-primary-100 rounded-xl grid place-items-center">
+                            <svg class="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500">Level {{ $gamification['level'] }} · {{ number_format($gamification['xp']) }} XP</p>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <div class="w-24 h-1.5 bg-primary-200 rounded-full overflow-hidden">
+                                    <div class="h-full bg-primary-600 rounded-full" style="width: {{ $gamification['xpProgress'] }}%"></div>
+                                </div>
+                                <span class="text-[10px] text-gray-400">{{ $gamification['xpProgress'] }}%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Streak --}}
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/></svg>
+                        <span class="text-sm font-semibold text-gray-700">{{ $gamification['streak'] }} day streak</span>
+                    </div>
+
+                    {{-- Rank --}}
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172"/></svg>
+                        <span class="text-sm font-semibold text-gray-700">Rank #{{ number_format($gamification['rank']) }}</span>
+                    </div>
+                </div>
+
+                <a href="{{ route('gamification.index') }}" class="text-sm font-semibold text-primary-600 hover:text-primary-700 transition">
+                    View Gamification →
+                </a>
+            </div>
+            @if($gamification['recentBadges']->isNotEmpty())
+                <div class="flex items-center gap-2 mt-3 pt-3 border-t border-primary-100/60">
+                    <span class="text-xs text-gray-500">Recent badges:</span>
+                    @foreach($gamification['recentBadges'] as $badge)
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium" style="background: {{ $badge->color }}20; color: {{ $badge->color }}">{{ $badge->name }}</span>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+
         {{-- Tabs --}}
         <div class="border-b border-gray-200">
             <div class="flex gap-6 overflow-x-auto">

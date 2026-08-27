@@ -28,6 +28,9 @@ class Quiz extends Model
         'shuffle_questions',
         'shuffle_options',
         'is_active',
+        'due_date',
+        'max_file_size_mb',
+        'allowed_extensions',
     ];
 
     protected function casts(): array
@@ -36,6 +39,8 @@ class Quiz extends Model
             'is_active' => 'boolean',
             'shuffle_questions' => 'boolean',
             'shuffle_options' => 'boolean',
+            'due_date' => 'datetime',
+            'max_file_size_mb' => 'integer',
         ];
     }
 
@@ -52,6 +57,11 @@ class Quiz extends Model
     public function attempts(): HasMany
     {
         return $this->hasMany(QuizAttempt::class);
+    }
+
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(AssignmentSubmission::class);
     }
 
     public function totalPoints(): int
@@ -83,5 +93,47 @@ class Quiz extends Model
             ->whereNotNull('completed_at')
             ->orderByDesc('score')
             ->first();
+    }
+
+    public function isAssignment(): bool
+    {
+        return $this->type === 'assignment';
+    }
+
+    public function hasDueDate(): bool
+    {
+        return $this->due_date !== null;
+    }
+
+    public function isOverdue(): bool
+    {
+        return $this->hasDueDate() && $this->due_date->isPast();
+    }
+
+    public function canSubmit(): bool
+    {
+        if ($this->isOverdue()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function submissionFor(int $userId): ?AssignmentSubmission
+    {
+        return $this->submissions()
+            ->where('user_id', $userId)
+            ->latest()
+            ->first();
+    }
+
+    public function submittedCount(): int
+    {
+        return $this->submissions()->count();
+    }
+
+    public function gradedCount(): int
+    {
+        return $this->submissions()->where('status', 'graded')->count();
     }
 }

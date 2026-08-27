@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 @section('title', 'Live Classes')
 @section('content')
-    <div class="max-w-4xl mx-auto space-y-6">
+    <div class="max mx-auto space-y-6">
         {{-- Header --}}
         <div class="flex items-center gap-3">
             <a href="{{ route('admin.courses.curriculum', $course) }}" class="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition">
@@ -97,6 +97,11 @@
                     </div>
 
                     <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-auto" x-show="!editing">
+                        @if(!$upcoming)
+                            <a href="{{ route('admin.courses.live-classes.attendance', [$course, $class]) }}" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="View Attendance">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                            </a>
+                        @endif
                         <button type="button" @click="editing = true" class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition" title="Edit / Reschedule">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/></svg>
                         </button>

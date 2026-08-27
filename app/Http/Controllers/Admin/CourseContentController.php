@@ -152,7 +152,7 @@ class CourseContentController extends Controller
             'lesson_id' => $lesson->id,
             'title' => $validated['title'],
             'file_path' => $request->hasFile('file')
-                ? $request->file('file')->store('lessons/resources', 'public')
+                ? $request->file('file')->store('lessons/resources', 'upload')
                 : null,
             'external_url' => $validated['external_url'] ?? null,
         ]);
@@ -165,7 +165,7 @@ class CourseContentController extends Controller
         $this->authorizeLesson(Lesson::withTrashed()->findOrFail($resource->lesson_id));
 
         if ($resource->file_path) {
-            Storage::disk('public')->delete($resource->file_path);
+            Storage::disk('upload')->delete($resource->file_path);
         }
 
         $resource->delete();

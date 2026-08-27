@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 @section('title', $quiz->exists ? 'Edit Test' : 'New Test')
 @section('content')
-    <div class="max-w-4xl mx-auto space-y-6">
+    <div class="max mx-auto space-y-6">
         {{-- Header --}}
         <div class="flex items-center gap-3">
             <a href="{{ route('admin.courses.tests.index', $course) }}" class="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition">

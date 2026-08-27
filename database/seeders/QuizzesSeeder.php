@@ -17,6 +17,9 @@ class QuizzesSeeder extends Seeder
                 'description' => 'A short quiz covering the first half of the course. You need 60% to pass.',
                 'passing_score' => 60,
                 'duration_minutes' => 20,
+                'max_attempts' => 3,
+                'shuffle_questions' => false,
+                'shuffle_options' => true,
                 'questions' => [
                     [
                         'question' => 'Which of the following best describes the primary goal of this module?',
@@ -54,6 +57,9 @@ class QuizzesSeeder extends Seeder
                 'description' => 'Comprehensive final exam covering all modules. Score at least 70% to earn your certificate.',
                 'passing_score' => 70,
                 'duration_minutes' => 45,
+                'max_attempts' => 2,
+                'shuffle_questions' => true,
+                'shuffle_options' => true,
                 'questions' => [
                     [
                         'question' => 'Which statement about the core concepts covered in this course is correct?',
@@ -99,29 +105,38 @@ class QuizzesSeeder extends Seeder
 
         foreach (Course::all() as $course) {
             foreach ($blueprint as $entry) {
-                Quiz::firstOrCreate(
+                $quiz = Quiz::firstOrCreate(
                     ['course_id' => $course->id, 'title' => $entry['title']],
                     [
                         'type' => $entry['type'],
                         'description' => $entry['description'],
                         'passing_score' => $entry['passing_score'],
                         'duration_minutes' => $entry['duration_minutes'],
+                        'max_attempts' => $entry['max_attempts'],
+                        'shuffle_questions' => $entry['shuffle_questions'],
+                        'shuffle_options' => $entry['shuffle_options'],
                         'is_active' => true,
                     ]
-                )->questions()->createMany(
-                    collect($entry['questions'])->map(fn ($q, $i) => [
-                        'question' => $q['question'],
-                        'points' => $q['points'],
-                        'sort_order' => $i,
-                    ])->all()
-                )->each(function ($question, $i) use ($entry) {
-                    collect($entry['questions'][$i]['options'])->each(
-                        fn ($opt) => $question->options()->create([
-                            'option_text' => $opt[0],
-                            'is_correct' => $opt[1],
-                        ])
-                    );
-                });
+                );
+
+                foreach ($entry['questions'] as $i => $q) {
+                    $question = $quiz->questions()
+                        ->firstOrCreate(
+                            ['question' => $q['question'], 'sort_order' => $i],
+                            [
+                                'type' => count($q['options']) === 2 ? 'true_false' : 'multiple_choice',
+                                'points' => $q['points'],
+                                'sort_order' => $i,
+                            ]
+                        );
+
+                    foreach ($q['options'] as $opt) {
+                        $question->options()->firstOrCreate(
+                            ['option_text' => $opt[0]],
+                            ['is_correct' => $opt[1]]
+                        );
+                    }
+                }
             }
         }
     }

@@ -13,16 +13,18 @@
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 {{-- Left Content --}}
                 <div>
-                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-sm font-medium mb-6">
-                        <span class="w-2 h-2 bg-secondary-400 rounded-full animate-pulse"></span>
-                        #1 Platform for Professional Learning
-                    </div>
+                    @if(setting('hero_badge'))
+                        <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-sm font-medium mb-6">
+                            <span class="w-2 h-2 bg-secondary-400 rounded-full animate-pulse"></span>
+                            {{ setting('hero_badge', '#1 Platform for Professional Learning') }}
+                        </div>
+                    @endif
                     <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-                        Upskill for the
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-300">AI-First World</span>
+                        {{ setting('hero_title', 'Upskill for the') }}
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-300">{{ setting('hero_title_highlight', 'AI-First World') }}</span>
                     </h1>
                     <p class="text-lg text-primary-200 leading-relaxed mb-8 max-w-lg">
-                        Master in-demand skills with industry-relevant courses, hands-on projects, and globally recognized certifications.
+                        {{ setting('hero_description', 'Master in-demand skills with industry-relevant courses, hands-on projects, and globally recognized certifications.') }}
                     </p>
 
                     {{-- Search Bar --}}
@@ -43,37 +45,43 @@
                     </div>
                 </div>
 
-                {{-- Right Content - Stats Card --}}
+                {{-- Right Content - Hero Image or Stats Card --}}
                 <div class="hidden lg:block">
-                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
-                        <div class="grid grid-cols-2 gap-6">
-                            <div class="bg-white/10 rounded-xl p-5 text-center">
-                                <div class="text-3xl font-bold text-white mb-1">{{ $stats['courses'] }}</div>
-                                <div class="text-sm text-primary-200">Courses</div>
+                    @if(setting_image('hero_image'))
+                        <div class="rounded-2xl overflow-hidden border border-white/10">
+                            <img src="{{ setting_image('hero_image') }}" alt="{{ setting('hero_title', 'LMS Portal') }}" class="w-full h-auto object-cover rounded-2xl">
+                        </div>
+                    @else
+                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+                            <div class="grid grid-cols-2 gap-6">
+                                <div class="bg-white/10 rounded-xl p-5 text-center">
+                                    <div class="text-3xl font-bold text-white mb-1">{{ $stats['courses'] }}</div>
+                                    <div class="text-sm text-primary-200">Courses</div>
+                                </div>
+                                <div class="bg-white/10 rounded-xl p-5 text-center">
+                                    <div class="text-3xl font-bold text-white mb-1">{{ $stats['instructors'] }}</div>
+                                    <div class="text-sm text-primary-200">Instructors</div>
+                                </div>
+                                <div class="bg-white/10 rounded-xl p-5 text-center">
+                                    <div class="text-3xl font-bold text-white mb-1">{{ number_format($stats['students']) }}</div>
+                                    <div class="text-sm text-primary-200">Students</div>
+                                </div>
+                                <div class="bg-white/10 rounded-xl p-5 text-center">
+                                    <div class="text-3xl font-bold text-white mb-1">{{ $stats['avgRating'] ?: '—' }}</div>
+                                    <div class="text-sm text-primary-200">Avg Rating</div>
+                                </div>
                             </div>
-                            <div class="bg-white/10 rounded-xl p-5 text-center">
-                                <div class="text-3xl font-bold text-white mb-1">{{ $stats['instructors'] }}</div>
-                                <div class="text-sm text-primary-200">Instructors</div>
-                            </div>
-                            <div class="bg-white/10 rounded-xl p-5 text-center">
-                                <div class="text-3xl font-bold text-white mb-1">{{ number_format($stats['students']) }}</div>
-                                <div class="text-sm text-primary-200">Students</div>
-                            </div>
-                            <div class="bg-white/10 rounded-xl p-5 text-center">
-                                <div class="text-3xl font-bold text-white mb-1">{{ $stats['avgRating'] ?: '—' }}</div>
-                                <div class="text-sm text-primary-200">Avg Rating</div>
+                            <div class="mt-6 flex items-center gap-3">
+                                <div class="flex -space-x-2">
+                                    <div class="w-8 h-8 bg-accent-400 rounded-full border-2 border-white/20 flex items-center justify-center text-xs font-bold text-white">A</div>
+                                    <div class="w-8 h-8 bg-secondary-400 rounded-full border-2 border-white/20 flex items-center justify-center text-xs font-bold text-white">B</div>
+                                    <div class="w-8 h-8 bg-purple-400 rounded-full border-2 border-white/20 flex items-center justify-center text-xs font-bold text-white">C</div>
+                                    <div class="w-8 h-8 bg-primary-400 rounded-full border-2 border-white/20 flex items-center justify-center text-xs font-bold text-white">+</div>
+                                </div>
+                                <p class="text-sm text-primary-200">Join 10,000+ learners today</p>
                             </div>
                         </div>
-                        <div class="mt-6 flex items-center gap-3">
-                            <div class="flex -space-x-2">
-                                <div class="w-8 h-8 bg-accent-400 rounded-full border-2 border-white/20 flex items-center justify-center text-xs font-bold text-white">A</div>
-                                <div class="w-8 h-8 bg-secondary-400 rounded-full border-2 border-white/20 flex items-center justify-center text-xs font-bold text-white">B</div>
-                                <div class="w-8 h-8 bg-purple-400 rounded-full border-2 border-white/20 flex items-center justify-center text-xs font-bold text-white">C</div>
-                                <div class="w-8 h-8 bg-primary-400 rounded-full border-2 border-white/20 flex items-center justify-center text-xs font-bold text-white">+</div>
-                            </div>
-                            <p class="text-sm text-primary-200">Join 10,000+ learners today</p>
-                        </div>
-                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -165,9 +173,13 @@
                                         :students="number_format($course->students_count)"
                                         :duration="$course->duration_hours . ' hours'"
                                         :price="$course->price > 0 ? '$' . number_format($course->price, 2) : 'Free'"
-                                        :image="$course->thumbnail ? asset('storage/' . $course->thumbnail) : null"
+                                        :image="$course->thumbnail ? asset('assets/upload/' . $course->thumbnail) : null"
                                         :level="$course->level ?? 'Beginner'"
+                                        :subtitle="$course->subtitle"
+                                        :languages="array_merge([$course->language_code], array_keys($course->translations ?? []))"
                                         :bestseller="$course->students_count >= 5"
+                                        :comingSoon="$course->unlocks_at && $course->unlocks_at->isFuture()"
+                                        :comingSoonDate="$course->unlocks_at?->isFuture() ? $course->unlocks_at->format('M j, Y') : null"
                                         :slug="route('courses.show', $course)"
                                     />
                                 @endforeach

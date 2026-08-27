@@ -218,9 +218,13 @@
                                 :students="number_format($course->students_count)"
                                 :duration="$course->duration_hours . ' hours'"
                                 :price="$course->price > 0 ? '$' . number_format($course->price, 2) : 'Free'"
-                                :image="$course->thumbnail ? asset('storage/' . $course->thumbnail) : null"
+                                :image="$course->thumbnail ? asset('assets/upload/' . $course->thumbnail) : null"
                                 :level="$course->level ?? 'Beginner'"
+                                :subtitle="$course->subtitle"
+                                :languages="array_merge([$course->language_code], array_keys($course->translations ?? []))"
                                 :bestseller="$course->students_count >= 10"
+                                :comingSoon="$course->unlocks_at && $course->unlocks_at->isFuture()"
+                                :comingSoonDate="$course->unlocks_at?->isFuture() ? $course->unlocks_at->format('M j, Y') : null"
                                 :slug="route('courses.show', $course)"
                             />
                         @endforeach

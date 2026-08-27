@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LiveClass extends Model
 {
@@ -30,6 +31,11 @@ class LiveClass extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
+    }
+
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(LiveClassAttendance::class);
     }
 
     public function isUpcoming(): bool

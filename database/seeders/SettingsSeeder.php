@@ -12,6 +12,10 @@ class SettingsSeeder extends Seeder
         Setting::set([
             'site_name' => 'LMS Portal',
             'site_tagline' => 'Learn. Grow. Succeed.',
+            'hero_badge' => '📚 Trusted by 100,000+ learners worldwide',
+            'hero_title' => 'Unlock Your Future with',
+            'hero_title_highlight' => 'World-Class Courses',
+            'hero_description' => 'Learn from industry experts, build real projects, earn certificates and grow your career at your own pace.',
             'about_title' => 'About Us',
             'about_description' => 'We are a modern learning platform on a mission to make world-class education accessible to everyone. Learn from industry experts, build real projects, earn certificates and grow your career at your own pace.',
             'footer_description' => 'Empowering millions of learners worldwide with industry-relevant courses and certifications from expert instructors.',

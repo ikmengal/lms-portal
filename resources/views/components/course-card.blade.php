@@ -10,8 +10,12 @@
     'originalPrice' => null,
     'image' => null,
     'level' => 'Beginner',
+    'subtitle' => null,
+    'languages' => [],
     'bestseller' => false,
     'slug' => '#',
+    'comingSoon' => false,
+    'comingSoonDate' => null,
 ])
 
 @php
@@ -31,7 +35,12 @@
                 </svg>
             </div>
         @endif
-        @if($bestseller)
+        @if($comingSoon)
+            <span class="absolute top-3 left-3 px-2.5 py-1 bg-violet-600 text-white text-xs font-bold rounded-md shadow flex items-center gap-1">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 001.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+                Coming Soon
+            </span>
+        @elseif($bestseller)
             <span class="absolute top-3 left-3 px-2.5 py-1 bg-accent-500 text-white text-xs font-bold rounded-md shadow">Bestseller</span>
         @endif
         <span class="absolute top-3 right-3 px-2.5 py-1 bg-white/90 backdrop-blur text-gray-700 text-xs font-medium rounded-md">{{ $level }}</span>
@@ -40,7 +49,10 @@
     {{-- Content --}}
     <div class="p-5">
         <p class="text-xs font-medium text-primary-600 uppercase tracking-wide mb-1.5">{{ $category }}</p>
-        <h3 class="font-semibold text-gray-900 group-hover:text-primary-700 transition line-clamp-2 leading-snug mb-3">{{ $title }}</h3>
+        <h3 class="font-semibold text-gray-900 group-hover:text-primary-700 transition line-clamp-2 leading-snug mb-2">{{ $title }}</h3>
+        @if($subtitle)
+            <p class="text-sm text-gray-500 leading-snug line-clamp-2 mb-3">{{ $subtitle }}</p>
+        @endif
         <p class="text-sm text-gray-500 mb-3">By {{ $instructor }}</p>
 
         {{-- Rating --}}
@@ -72,6 +84,23 @@
             </span>
         </div>
 
+        {{-- Language availability --}}
+        @if(!empty($languages))
+            <div class="flex items-center gap-2 mb-4">
+                <span class="text-xs font-medium text-gray-400">Available in:</span>
+                <div class="flex flex-wrap items-center gap-1">
+                    @foreach($languages as $lc)
+                        @php
+                            $li = \language_info($lc);
+                        @endphp
+                        @if($li)
+                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-gray-50 border border-gray-100 rounded text-[11px] font-medium text-gray-600 whitespace-nowrap" title="{{ $li['name'] }}">{{ $li['flag'] }} {{ $li['native'] }}</span>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         {{-- Price --}}
         <div class="flex items-center justify-between pt-3 border-t border-gray-100">
             <div class="flex items-center gap-2">
@@ -80,7 +109,14 @@
                     <span class="text-sm text-gray-400 line-through">{{ $originalPrice }}</span>
                 @endif
             </div>
-            <span class="text-xs font-medium text-secondary-600 bg-secondary-50 px-2 py-1 rounded">Enroll Now</span>
+            @if($comingSoon)
+                <span class="inline-flex items-center gap-1 text-xs font-medium text-violet-700 bg-violet-50 px-2 py-1 rounded whitespace-nowrap">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 001.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+                    {{ $comingSoonDate ? 'Opens ' . $comingSoonDate : 'Coming Soon' }}
+                </span>
+            @else
+                <span class="text-xs font-medium text-secondary-600 bg-secondary-50 px-2 py-1 rounded">Enroll Now</span>
+            @endif
         </div>
     </div>
 </a>

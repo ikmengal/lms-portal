@@ -20,7 +20,7 @@ class Brand
             'name' => $name,
             'tagline' => $settings['site_tagline'] ?? null,
             'logoUrl' => ($settings['logo'] ?? null)
-                ? asset('storage/' . ltrim($settings['logo'], '/'))
+                ? asset('assets/upload/' . ltrim($settings['logo'], '/'))
                 : null,
             'supportEmail' => $settings['support_email']
                 ?? $settings['contact_email']

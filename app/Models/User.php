@@ -55,6 +55,37 @@ class User extends Authenticatable
         return $this->hasMany(Wishlist::class);
     }
 
+    public function xpTransactions(): HasMany
+    {
+        return $this->hasMany(XpTransaction::class);
+    }
+
+    public function badges(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Badge::class, 'user_badges', 'user_id', 'badge_id')
+            ->withPivot('earned_at');
+    }
+
+    public function streak(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(UserStreak::class);
+    }
+
+    public function discussions(): HasMany
+    {
+        return $this->hasMany(Discussion::class);
+    }
+
+    public function lessonProgress(): HasMany
+    {
+        return $this->hasMany(LessonProgress::class);
+    }
+
+    public function quizAttempts(): HasMany
+    {
+        return $this->hasMany(QuizAttempt::class);
+    }
+
     public function getInitialsAttribute(): string
     {
         $parts = explode(' ', $this->name);
@@ -72,12 +103,12 @@ class User extends Authenticatable
 
     public function getAvatarUrlAttribute(): ?string
     {
-        return $this->avatar ? asset('storage/' . $this->avatar) : null;
+        return $this->avatar ? asset('assets/upload/' . $this->avatar) : null;
     }
 
     public function getBannerUrlAttribute(): ?string
     {
-        return $this->banner ? asset('storage/' . $this->banner) : null;
+        return $this->banner ? asset('assets/upload/' . $this->banner) : null;
     }
 
     public function sendPasswordResetNotification($token): void

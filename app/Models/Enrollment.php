@@ -15,6 +15,7 @@ class Enrollment extends Model
         'course_id',
         'progress',
         'completed_at',
+        'last_lesson_id',
     ];
 
     protected function casts(): array
@@ -32,6 +33,11 @@ class Enrollment extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
+    }
+
+    public function lastLesson(): BelongsTo
+    {
+        return $this->belongsTo(Lesson::class, 'last_lesson_id');
     }
 
     public function isCompleted(): bool

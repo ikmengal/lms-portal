@@ -69,7 +69,7 @@
         </div>
         @endrole
 
-        <div x-data="{ preview: '{{ isset($course) && $course->thumbnail ? asset('storage/' . $course->thumbnail) : null }}' }">
+        <div x-data="{ preview: '{{ isset($course) && $course->thumbnail ? asset('assets/upload/' . $course->thumbnail) : null }}' }">
             <label class="block text-sm font-medium text-gray-700 mb-1">Thumbnail</label>
             <div class="flex items-center gap-3">
                 <div class="w-24 h-16 bg-gray-50 border border-dashed border-gray-200 rounded-lg flex items-center justify-center overflow-hidden shrink-0">

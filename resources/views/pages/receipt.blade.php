@@ -2,6 +2,9 @@
 
 @php
     $brand = \App\Support\Brand::data();
+    $totalDiscount = $relatedPayments->sum('discount_amount');
+    $totalAmount = $relatedPayments->sum('amount');
+    $totalFinal = $relatedPayments->sum('final_amount') ?: $totalAmount;
 @endphp
 
 @section('title', 'Payment Receipt')
@@ -115,15 +118,23 @@
                     <tfoot>
                         <tr>
                             <td colspan="2" class="pt-4 pb-1 text-right text-gray-500">Subtotal</td>
-                            <td class="pt-4 pb-1 text-right text-gray-800">${{ number_format($total, 2) }}</td>
+                            <td class="pt-4 pb-1 text-right text-gray-800">${{ number_format($totalAmount, 2) }}</td>
                         </tr>
-                        <tr>
-                            <td colspan="2" class="pb-1 text-right text-gray-500">Discount</td>
-                            <td class="pb-1 text-right text-gray-800">$0.00</td>
-                        </tr>
+                        @if($totalDiscount > 0)
+                            <tr>
+                                <td colspan="2" class="pb-1 text-right text-secondary-600">Discount</td>
+                                <td class="pb-1 text-right text-secondary-600 font-medium">-${{ number_format($totalDiscount, 2) }}</td>
+                            </tr>
+                            @if($relatedPayments->first()?->coupon)
+                                <tr>
+                                    <td colspan="2" class="pb-1 text-right text-gray-400 text-xs">Coupon: {{ $relatedPayments->first()->coupon->code }}</td>
+                                    <td></td>
+                                </tr>
+                            @endif
+                        @endif
                         <tr>
                             <td colspan="2" class="py-2 text-right font-bold text-gray-900 text-base">Total Paid</td>
-                            <td class="py-2 text-right font-bold text-base" style="color: {{ $brand['primary'] }}">${{ number_format($total, 2) }} {{ $payment->currency }}</td>
+                            <td class="py-2 text-right font-bold text-base" style="color: {{ $brand['primary'] }}">${{ number_format($totalFinal > 0 ? $totalFinal : $totalAmount, 2) }} {{ $payment->currency }}</td>
                         </tr>
                     </tfoot>
                 </table>

@@ -62,13 +62,13 @@
                             <ul class="space-y-3 flex-1 mb-8">
                                 @foreach($plan['features'] as $feature)
                                     <li class="flex items-start gap-3 text-sm text-gray-600">
-                                        <span class="text-secondary-500 mt-0.5 shrink-0">{{ $check }}</span>
+                                        <span class="text-secondary-500 mt-0.5 shrink-0">{!! $check !!}</span>
                                         {{ $feature }}
                                     </li>
                                 @endforeach
                                 @foreach($plan['excluded'] as $feature)
                                     <li class="flex items-start gap-3 text-sm text-gray-300 line-through decoration-gray-200">
-                                        <span class="mt-0.5 shrink-0">{{ $cross }}</span>
+                                        <span class="mt-0.5 shrink-0">{!! $cross !!}</span>
                                         {{ $feature }}
                                     </li>
                                 @endforeach
@@ -141,9 +141,9 @@
                                     @foreach(['free', 'pro', 'team'] as $col)
                                         <td class="px-4 py-3.5 text-center {{ $col === 'pro' ? 'bg-primary-50/40' : '' }}">
                                             @if($row[$col] === true)
-                                                <span class="inline-grid place-items-center w-6 h-6 rounded-full bg-secondary-50 text-secondary-600">{{ $check }}</span>
+                                                <span class="inline-grid place-items-center w-6 h-6 rounded-full bg-secondary-50 text-secondary-600">{!! $check !!}</span>
                                             @elseif($row[$col] === false)
-                                                <span class="inline-grid place-items-center w-6 h-6 rounded-full bg-gray-50 text-gray-300">{{ $cross }}</span>
+                                                <span class="inline-grid place-items-center w-6 h-6 rounded-full bg-gray-50 text-gray-300">{!! $cross !!}</span>
                                             @else
                                                 <span class="text-xs font-semibold text-gray-600">{{ $row[$col] }}</span>
                                             @endif

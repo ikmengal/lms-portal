@@ -44,7 +44,7 @@ class BlogPost extends Model
 
     public function getImageUrlAttribute(): ?string
     {
-        return $this->image ? asset('storage/' . $this->image) : null;
+        return $this->image ? asset('assets/upload/' . $this->image) : null;
     }
 
     public function getReadingTimeAttribute(): int

@@ -134,7 +134,7 @@
                                 :students="number_format($course->students_count)"
                                 :duration="$course->duration_hours . ' hours'"
                                 :price="$course->price > 0 ? '$' . number_format($course->price, 2) : 'Free'"
-                                :image="$course->thumbnail ? asset('storage/' . $course->thumbnail) : null"
+                                :image="$course->thumbnail ? asset('assets/upload/' . $course->thumbnail) : null"
                                 :level="$course->level ?? 'Beginner'"
                                 :bestseller="$course->students_count >= 10"
                                 :slug="route('courses.show', $course)"

@@ -199,6 +199,10 @@ class QuizAttemptController extends Controller
 
         \App\Services\Notifier::quizResult($attempt->refresh());
 
+        if ($attempt->passed) {
+            \App\Services\GamificationService::recordQuizPassed(auth()->user(), $attempt);
+        }
+
         return redirect()
             ->route('courses.tests.show', [$course, $quiz])
             ->with('attempt_results', [

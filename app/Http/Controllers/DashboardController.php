@@ -7,6 +7,9 @@ use Illuminate\Routing\Controllers\Middleware;    // 2. Import this
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\{
+    ContactMessage,
+    Certificate,
+    QuizAttempt,
     Enrollment,
     Course,
     User
@@ -38,21 +41,21 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         $stats = [
-            'totalUsers' => \App\Models\User::count(),
-            'newUsersToday' => \App\Models\User::whereDate('created_at', today())->count(),
-            'totalCourses' => \App\Models\Course::count(),
-            'activeCourses' => \App\Models\Course::where('price', '>', 0)->count(),
-            'instructors' => \App\Models\User::role('instructor')->count(),
-            'students' => \App\Models\User::role('student')->count(),
-            'admins' => \App\Models\User::role('admin')->count(),
-            'enrollments' => \App\Models\Enrollment::count(),
-            'enrollmentsToday' => \App\Models\Enrollment::whereDate('created_at', today())->count(),
+            'totalUsers' => User::count(),
+            'newUsersToday' => User::whereDate('created_at', today())->count(),
+            'totalCourses' => Course::count(),
+            'activeCourses' => Course::where('price', '>', 0)->count(),
+            'instructors' => User::role('instructor')->count(),
+            'students' => User::role('student')->count(),
+            'admins' => User::role('admin')->count(),
+            'enrollments' => Enrollment::count(),
+            'enrollmentsToday' => Enrollment::whereDate('created_at', today())->count(),
         ];
 
-        $recentUsers = \App\Models\User::latest()->take(8)->get();
+        $recentUsers = User::latest()->take(8)->get();
 
-        $recentMessages = \App\Models\ContactMessage::latest()->take(4)->get();
-        $unreadMessages = \App\Models\ContactMessage::where('is_read', false)->count();
+        $recentMessages = ContactMessage::latest()->take(4)->get();
+        $unreadMessages = ContactMessage::where('is_read', false)->count();
 
         return view('pages.admin.dashboard', compact(
             'stats', 'recentUsers', 'recentMessages', 'unreadMessages'
@@ -263,7 +266,7 @@ class DashboardController extends Controller
             ]);
         }
 
-        foreach (\App\Models\QuizAttempt::where('user_id', $user->id)->with('quiz.course')->latest('completed_at')->take(6)->get() as $attempt) {
+        foreach (QuizAttempt::where('user_id', $user->id)->with('quiz.course')->latest('completed_at')->take(6)->get() as $attempt) {
             if (!$attempt->quiz) continue;
             $activities->push([
                 'type' => $attempt->passed ? 'passed' : 'failed',
@@ -296,12 +299,21 @@ class DashboardController extends Controller
             ->take(8)
             ->values();
 
+        $gamification = [
+            'xp' => $user->xp ?? 0,
+            'level' => \App\Services\GamificationService::currentLevel($user),
+            'xpProgress' => \App\Services\GamificationService::xpProgressInLevel($user),
+            'streak' => $user->streak?->current_streak ?? 0,
+            'rank' => \App\Services\GamificationService::rank($user),
+            'recentBadges' => $user->badges()->orderByPivot('earned_at', 'desc')->take(3)->get(),
+        ];
+
         return view('pages.student.dashboard', compact(
-            'stats', 'enrolledCourses', 'certificates', 'wishlist', 'continueLearning', 'recentActivity'
+            'stats', 'enrolledCourses', 'certificates', 'wishlist', 'continueLearning', 'recentActivity', 'gamification'
         ));
     }
 
-    public function certificate(\App\Models\Certificate $certificate)
+    public function certificate(Certificate $certificate)
     {
         abort_unless($certificate->user_id === Auth::id(), 403);
 
@@ -310,7 +322,7 @@ class DashboardController extends Controller
         return view('pages.student.certificate', compact('certificate'));
     }
 
-    public function downloadCertificate(\App\Models\Certificate $certificate)
+    public function downloadCertificate(Certificate $certificate)
     {
         abort_unless($certificate->user_id === Auth::id(), 403);
 
@@ -329,12 +341,12 @@ class DashboardController extends Controller
 
     public function verify(string $code)
     {
-        $certificate = \App\Models\Certificate::with(['user', 'course.instructor'])
+        $certificate = Certificate::with(['user', 'course.instructor'])
             ->where('code', strtoupper(trim($code)))
             ->first();
 
         $enrollment = $certificate
-            ? \App\Models\Enrollment::where('user_id', $certificate->user_id)
+            ? Enrollment::where('user_id', $certificate->user_id)
                 ->where('course_id', $certificate->course_id)
                 ->first()
             : null;
@@ -344,7 +356,7 @@ class DashboardController extends Controller
 
     public function users()
     {
-        $users = \App\Models\User::with('roles')->latest()->paginate(10);
+        $users = User::with('roles')->latest()->paginate(10);
 
         return view('pages.admin.users', compact('users'));
     }

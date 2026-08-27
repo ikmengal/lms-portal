@@ -154,6 +154,9 @@ class CourseController extends Controller
         $wishlisted = auth()->check()
             && \App\Models\Wishlist::where('user_id', auth()->id())->where('course_id', $course->id)->exists();
 
+        $comingSoon = \App\Support\ContentDrip::courseComingSoon($course);
+        $unlocksAt = $course->unlocks_at;
+
         return view('pages.course-detail', compact(
             'course',
             'enrollment',
@@ -169,7 +172,9 @@ class CourseController extends Controller
             'quizzes',
             'bestScores',
             'attemptCounts',
-            'wishlisted'
+            'wishlisted',
+            'comingSoon',
+            'unlocksAt'
         ));
     }
 

@@ -2,7 +2,7 @@
 @section('title', 'Website Settings')
 @php
     $val = fn (string $key, string $default = '') => old($key, $site[$key] ?? $default);
-    $img = fn (string $key) => old($key) ? null : (\App\Models\Setting::get($key) ? asset('storage/' . \App\Models\Setting::get($key)) : null);
+    $img = fn (string $key) => old($key) ? null : (\App\Models\Setting::get($key) ? asset('assets/upload/' . \App\Models\Setting::get($key)) : null);
 @endphp
 @section('content')
     <div class="max-w-5xl mx-auto space-y-6" x-data="{ tab: 'general' }">
@@ -24,12 +24,14 @@
             @php
                 $tabs = [
                     'general'   => ['General', ['site_name', 'site_tagline'], 'M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25'],
+                    'hero'      => ['Hero Section', ['hero_badge', 'hero_title', 'hero_title_highlight', 'hero_description'], 'M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25'],
                     'branding'  => ['Branding', ['logo', 'dark_logo', 'favicon', 'banner'], 'M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A1.5 1.5 0 0021.75 19.5V4.5A1.5 1.5 0 0020.25 3H3.75A1.5 1.5 0 002.25 4.5v15A1.5 1.5 0 003.75 21z'],
                     'about'     => ['About & Description', ['about_title', 'about_description', 'footer_description'], 'M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018'],
                     'contact'   => ['Contact Info', ['contact_email', 'support_email', 'contact_phone', 'contact_address', 'office_hours'], 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75'],
                     'social'    => ['Social Links', ['facebook_url', 'twitter_url', 'instagram_url', 'linkedin_url', 'youtube_url'], 'M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244'],
                     'seo'       => ['SEO & Meta', ['meta_title', 'meta_description', 'meta_keywords'], 'M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'],
                     'advanced'  => ['Advanced', ['copyright_text', 'maintenance_mode', 'maintenance_message'], 'M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z'],
+                    'certificate' => ['Certificate', ['certificate_badge'], 'M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z'],
                 ];
             @endphp
 
@@ -77,6 +79,99 @@
                 <div class="bg-gray-50 border border-gray-100 rounded-lg p-4">
                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Live Preview</p>
                     <p class="text-lg font-bold text-primary-900">{{ $val('site_name', 'LMS Portal') }} <span class="font-normal text-gray-400 text-sm">— {{ $val('site_tagline') }}</span></p>
+                </div>
+            </div>
+
+            {{-- ================= HERO ================= --}}
+            <div x-show="tab === 'hero'" x-cloak class="space-y-6">
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-6">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900">Hero Section</h2>
+                        <p class="text-sm text-gray-500 mt-0.5">Customize the homepage hero banner text and optional background image.</p>
+                    </div>
+
+                    <div class="grid sm:grid-cols-2 gap-6">
+                        <div>
+                            <label for="hero_badge" class="block text-sm font-medium text-gray-700 mb-1">Badge Text</label>
+                            <input type="text" id="hero_badge" name="hero_badge" value="{{ $val('hero_badge', '#1 Platform for Professional Learning') }}"
+                                class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm transition @error('hero_badge') border-red-300 @enderror" />
+                            <p class="mt-1 text-xs text-gray-400">Small badge above the headline.</p>
+                            @error('hero_badge')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label for="hero_title_highlight" class="block text-sm font-medium text-gray-700 mb-1">Headline Highlight</label>
+                            <input type="text" id="hero_title_highlight" name="hero_title_highlight" value="{{ $val('hero_title_highlight', 'AI-First World') }}"
+                                class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm transition @error('hero_title_highlight') border-red-300 @enderror" />
+                            <p class="mt-1 text-xs text-gray-400">Gradient-colored text at the end of the headline.</p>
+                            @error('hero_title_highlight')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="hero_title" class="block text-sm font-medium text-gray-700 mb-1">Headline</label>
+                        <input type="text" id="hero_title" name="hero_title" value="{{ $val('hero_title', 'Upskill for the') }}"
+                            class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm transition @error('hero_title') border-red-300 @enderror" />
+                        <p class="mt-1 text-xs text-gray-400">First line of the hero headline. The highlight text is appended after a line break.</p>
+                        @error('hero_title')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div>
+                        <label for="hero_description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea id="hero_description" name="hero_description" rows="3"
+                            class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm transition @error('hero_description') border-red-300 @enderror"
+                            placeholder="Describe your platform...">{{ $val('hero_description', 'Master in-demand skills with industry-relevant courses, hands-on projects, and globally recognized certifications.') }}</textarea>
+                        @error('hero_description')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="bg-gray-50 border border-gray-100 rounded-lg p-4">
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Live Preview</p>
+                        <div class="bg-gradient-to-br from-primary-900 via-primary-800 to-primary-950 rounded-lg p-6">
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-full text-white/90 text-xs font-medium mb-3">
+                                <span class="w-1.5 h-1.5 bg-secondary-400 rounded-full animate-pulse"></span>
+                                {{ $val('hero_badge', '#1 Platform for Professional Learning') }}
+                            </div>
+                            <h3 class="text-xl font-bold text-white leading-tight mb-2">
+                                {{ $val('hero_title', 'Upskill for the') }}
+                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-300">{{ $val('hero_title_highlight', 'AI-First World') }}</span>
+                            </h3>
+                            <p class="text-sm text-primary-200 max-w-md">{{ $val('hero_description', 'Master in-demand skills with industry-relevant courses, hands-on projects, and globally recognized certifications.') }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Hero Image --}}
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <div class="mb-4">
+                        <h2 class="text-lg font-semibold text-gray-900">Hero Image</h2>
+                        <p class="text-sm text-gray-500 mt-0.5">Optional image shown on the right side of the hero section. Recommended: 600×600px PNG/WebP.</p>
+                    </div>
+
+                    <div x-data="{ preview: null }">
+                        <div class="flex items-start gap-6">
+                            <div class="w-48 h-48 bg-gradient-to-br from-primary-600 to-primary-800 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                                <template x-if="preview"><img :src="preview" class="w-full h-full object-cover"></template>
+                                <template x-if="!preview && {{ $img('hero_image') ? 'true' : 'false' }}"><img src="{{ $img('hero_image') }}" class="w-full h-full object-cover"></template>
+                                <template x-if="!preview && {{ $img('hero_image') ? 'false' : 'true' }}">
+                                    <div class="text-center">
+                                        <svg class="w-10 h-10 text-white/40 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A1.5 1.5 0 0021.75 19.5V4.5A1.5 1.5 0 0020.25 3H3.75A1.5 1.5 0 002.25 4.5v15A1.5 1.5 0 003.75 21z"/></svg>
+                                        <p class="text-xs text-white/50 mt-1">Default gradient in use</p>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="space-y-2 pt-2">
+                                <label class="cursor-pointer inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg transition">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                                    Choose File
+                                    <input type="file" name="hero_image" accept=".jpg,.jpeg,.png,.webp" class="hidden" @change="preview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null">
+                                </label>
+                                @if($img('hero_image'))
+                                    <button type="submit" form="remove-hero_image-form" class="block w-full inline-flex justify-center items-center gap-2 px-3 py-2 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition">Remove Current</button>
+                                @endif
+                                <p class="text-[11px] text-gray-400">When no image is uploaded, the right-side stats card is shown instead.</p>
+                            </div>
+                        </div>
+                        @error('hero_image')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                    </div>
                 </div>
             </div>
 
@@ -330,6 +425,43 @@
                 </div>
             </div>
 
+            {{-- ================= CERTIFICATE ================= --}}
+            <div x-show="tab === 'certificate'" x-cloak class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-6">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">Certificate Badge</h2>
+                    <p class="text-sm text-gray-500 mt-0.5">Upload a custom verification badge/seal for course completion certificates. PNG or SVG recommended with transparent background.</p>
+                </div>
+
+                <div x-data="{ preview: null }" class="border border-gray-200 rounded-xl p-5">
+                    <p class="text-sm font-semibold text-gray-900 mb-1">Certificate Badge / Seal</p>
+                    <p class="text-xs text-gray-400 mb-4">Recommended: 256×256px, transparent PNG or SVG. This badge replaces the default seal on both the browser view and PDF download of certificates.</p>
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-44 h-44 bg-gray-50 border border-dashed border-gray-200 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
+                            <template x-if="preview"><img :src="preview" class="max-w-full max-h-full object-contain"></template>
+                            <template x-if="!preview && {{ $img('certificate_badge') ? 'true' : 'false' }}"><img src="{{ $img('certificate_badge') }}" class="max-w-full max-h-full object-contain"></template>
+                            <template x-if="!preview && {{ $img('certificate_badge') ? 'false' : 'true' }}">
+                                <div class="text-center">
+                                    <svg class="w-10 h-10 text-gray-300 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"/></svg>
+                                    <p class="text-[11px] text-gray-400 mt-1">No badge uploaded</p>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="cursor-pointer inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg transition">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                                Choose File
+                                <input type="file" name="certificate_badge" accept=".jpg,.jpeg,.png,.svg,.webp" class="hidden" @change="preview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null">
+                            </label>
+                            @if($img('certificate_badge'))
+                                <button type="submit" form="remove-certificate-badge-form" class="block w-full inline-flex justify-center items-center gap-2 px-3 py-2 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition">Remove Current</button>
+                            @endif
+                            <p class="text-[11px] text-gray-400">Default GD-rendered seal is used when no badge is uploaded.</p>
+                        </div>
+                    </div>
+                    @error('certificate_badge')<p class="text-xs text-red-600">{{ $message }}</p>@enderror
+                </div>
+            </div>
+
             {{-- ================= ADVANCED ================= --}}
             <div x-show="tab === 'advanced'" x-cloak class="space-y-6">
                 <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-6">
@@ -384,7 +516,7 @@
         </form>
 
         {{-- Hidden remove-image forms (kept outside the main form since nested forms are invalid HTML) --}}
-        @foreach(['logo' => 'remove-logo-form', 'dark_logo' => 'remove-dark-logo-form', 'favicon' => 'remove-favicon-form', 'banner' => 'remove-banner-form'] as $key => $formId)
+        @foreach(['logo' => 'remove-logo-form', 'dark_logo' => 'remove-dark-logo-form', 'favicon' => 'remove-favicon-form', 'banner' => 'remove-banner-form', 'certificate_badge' => 'remove-certificate-badge-form', 'hero_image' => 'remove-hero_image-form'] as $key => $formId)
             @if(\App\Models\Setting::get($key))
                 <form id="{{ $formId }}" method="POST" action="{{ route('admin.settings.images.remove', ['key' => $key]) }}" class="hidden"
                     data-confirm="This will remove the current {{ str_replace('_', ' ', $key) }} from the site." data-confirm-title="Remove image?" data-confirm-button="Yes, remove it">

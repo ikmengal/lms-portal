@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <style>
-            @page { margin: 0; }
+            @page { size: A4 landscape; margin: 0; }
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font-family: Helvetica, Arial, sans-serif; }
 
@@ -64,41 +64,7 @@
             .sig-blue { border-bottom: 1px solid #4d6bff; }
             .sig-role { font-size: 9px; letter-spacing: 4px; text-transform: uppercase; color: #f2c9a8; margin-top: 6px; }
 
-            .seal-wrap { text-align: center; vertical-align: bottom; font-size: 0; line-height: 0; }
-            .stamp-edge {
-                width: 104px; height: 104px;
-                border: 2px dashed #ff7a11;
-                border-radius: 52px;
-                margin: 0 auto;
-                padding-top: 4px;
-            }
-            .stamp-outer {
-                width: 92px; height: 92px;
-                background: #131f66;
-                border: 2px solid #ff7a11;
-                border-radius: 46px;
-                margin: 0 auto;
-                text-align: center;
-            }
-            .stamp-inner {
-                width: 76px; height: 76px;
-                margin: 3px auto;
-                border: 1px solid #ff7a11;
-                border-radius: 38px;
-                text-align: center;
-            }
-            .stamp-top { font-size: 6px; line-height: 9px; font-weight: bold; letter-spacing: 1px; color: #ffb37a; padding-top: 8px; }
-            .stamp-check {
-                width: 18px; height: 18px; line-height: 18px;
-                margin: 3px auto;
-                background: #f05e07; color: #ffffff;
-                border-radius: 9px;
-                font-size: 10px; font-weight: bold;
-            }
-            .stamp-check span { font-family: zapfdingbats; font-size: 11px; color: #ffffff; }
-            .stamp-line { width: 36px; height: 1px; background: #ff7a11; margin: 0 auto; }
-            .stamp-certified { font-size: 8px; line-height: 11px; font-weight: bold; letter-spacing: 2px; color: #ffffff; margin-top: 2px; }
-            .stamp-year { font-size: 6.5px; line-height: 9px; letter-spacing: 1.5px; color: #ffb37a; margin-top: 1px; }
+            .seal-wrap { text-align: center; vertical-align: bottom; }
 
             .footer {
                 position: absolute; left: 64px; right: 64px; bottom: 40px;
@@ -145,17 +111,7 @@
                             <div class="sig-role">Course Instructor</div>
                         </td>
                         <td class="seal-wrap">
-                            <div class="stamp-edge">
-                                <div class="stamp-outer">
-                                    <div class="stamp-inner">
-                                        <div class="stamp-top">OFFICIALLY VERIFIED</div>
-                                        <div class="stamp-check"><span>3</span></div>
-                                        <div class="stamp-line"></div>
-                                        <div class="stamp-certified">CERTIFIED</div>
-                                        <div class="stamp-year">{{ $certificate->issued_at->format('Y') }}</div>
-                                    </div>
-                                </div>
-                            </div>
+                            <img src="{{ certificate_badge_data_uri($certificate->issued_at->format('Y'), 200) }}" style="width: 170px; height: 170px; display: block; margin: 0 auto; transform: rotate(-10deg);" />
                         </td>
                         <td>
                             <span class="sig-line sig-blue">{{ $certificate->issued_at->format('F j, Y') }}</span>
@@ -172,9 +128,15 @@
                         <span class="sep">|</span>
                         Verify at: <span class="url">{{ url('/verify-certificate/' . $certificate->code) }}</span>
                     </td>
-                    <td style="width: 96px; text-align: right; vertical-align: middle; font-size: 0; line-height: 0;">
-                        <span style="display: inline-block; vertical-align: middle; font-size: 8px; color: rgba(255,214,178,.55); padding-right: 6px;">SCAN TO VERIFY</span>
-                        <span style="display: inline-block; background: #ffffff; border-radius: 4px; padding: 3px; vertical-align: middle;">{!! qr_svg($certificate->verificationUrl(), 72) !!}</span>
+                    <td style="width: 110px; text-align: right; vertical-align: middle;">
+                        <table cellpadding="0" cellspacing="0" border="0" style="margin-left: auto;"><tr>
+                            <td style="vertical-align: middle; padding-right: 6px;">
+                                <span style="font-size: 7px; color: #f2c9a8; display: block; line-height: 10px;">SCAN TO<br>VERIFY</span>
+                            </td>
+                            <td style="vertical-align: middle; background: #ffffff; border-radius: 3px; padding: 3px;">
+                                <img src="{{ qr_png_data_uri($certificate->verificationUrl(), 96) }}" style="display: block; width: 48px; height: 48px;" />
+                            </td>
+                        </tr></table>
                     </td>
                 </tr></table>
             </div>

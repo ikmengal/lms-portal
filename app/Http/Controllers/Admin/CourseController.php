@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\CourseCategory;
 use App\Models\CourseLevel;
 use App\Models\User;
+use App\Services\Notifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -71,10 +72,12 @@ class CourseController extends Controller
         $validated['slug'] = $this->uniqueSlug($validated['title']);
 
         if ($request->hasFile('thumbnail')) {
-            $validated['thumbnail'] = $request->file('thumbnail')->store('courses/thumbnails', 'public');
+            $validated['thumbnail'] = $request->file('thumbnail')->store('courses/thumbnails', 'upload');
         }
 
-        Course::create($validated);
+        $course = Course::create($validated);
+
+        Notifier::courseCreated($course);
 
         return redirect()->route('admin.courses.index')->with('success', 'Course created successfully.');
     }
@@ -104,12 +107,14 @@ class CourseController extends Controller
 
         if ($request->hasFile('thumbnail')) {
             if ($course->thumbnail) {
-                Storage::disk('public')->delete($course->thumbnail);
+                Storage::disk('upload')->delete($course->thumbnail);
             }
-            $validated['thumbnail'] = $request->file('thumbnail')->store('courses/thumbnails', 'public');
+            $validated['thumbnail'] = $request->file('thumbnail')->store('courses/thumbnails', 'upload');
         }
 
         $course->update($validated);
+
+        Notifier::courseUpdated($course);
 
         return redirect()->route('admin.courses.index')->with('success', 'Course updated successfully.');
     }
@@ -119,7 +124,7 @@ class CourseController extends Controller
         $this->authorizeCourse($course);
 
         if ($course->thumbnail) {
-            Storage::disk('public')->delete($course->thumbnail);
+            Storage::disk('upload')->delete($course->thumbnail);
         }
 
         $course->delete();
@@ -169,7 +174,7 @@ class CourseController extends Controller
         $course = Course::onlyTrashed()->findOrFail($id);
 
         if ($course->thumbnail) {
-            Storage::disk('public')->delete($course->thumbnail);
+            Storage::disk('upload')->delete($course->thumbnail);
         }
 
         $course->forceDelete();

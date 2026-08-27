@@ -30,14 +30,30 @@ class DatabaseSeeder extends Seeder
 
         // Create permissions
         $permissionNames = [
+            // Admin
+            'view analytics',
+            'manage messages',
             'manage users',
             'manage courses',
             'manage categories',
-            'enroll courses',
-            'view dashboard',
+            'manage levels',
+            'view reports',
+            'manage roles',
+            'manage settings',
+            // Instructor
             'manage own courses',
             'grade students',
-            'view reports',
+            'view earnings',
+            // Student
+            'enroll courses',
+            'view dashboard',
+            'view learning',
+            'view progress',
+            'manage wishlist',
+            'view activity',
+            'view quiz history',
+            'view assignment history',
+            'view certificates',
         ];
 
         foreach ($permissionNames as $name) {
@@ -54,48 +70,62 @@ class DatabaseSeeder extends Seeder
         $admin->name = 'admin';
         $admin->guard_name = $guard;
         $admin->save();
-        $admin->givePermissionTo($permissionNames);
+        $admin->givePermissionTo([
+            'view analytics', 'manage messages', 'manage users', 'manage courses',
+            'manage categories', 'manage levels', 'view reports', 'manage roles', 'manage settings',
+            'view dashboard',
+        ]);
 
         $instructor = new Role();
         $instructor->name = 'instructor';
         $instructor->guard_name = $guard;
         $instructor->save();
-        $instructor->givePermissionTo(['manage own courses', 'grade students', 'view dashboard']);
+        $instructor->givePermissionTo(['manage own courses', 'grade students', 'view earnings', 'view dashboard']);
 
         $student = new Role();
         $student->name = 'student';
         $student->guard_name = $guard;
         $student->save();
-        $student->givePermissionTo(['enroll courses', 'view dashboard']);
-
-        // Create users
-        $adminUser = User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@lmsportal.com',
-            'password' => 'password',
-            'email_verified_at' => now(),
+        $student->givePermissionTo([
+            'enroll courses', 'view dashboard', 'view learning', 'view progress',
+            'manage wishlist', 'view activity', 'view quiz history', 'view assignment history', 'view certificates',
         ]);
-        $adminUser->assignRole('admin');
 
-        $instructorUser = User::create([
-            'name' => 'Dr. Sarah Johnson',
-            'email' => 'instructor@lmsportal.com',
-            'password' => 'password',
-            'email_verified_at' => now(),
-        ]);
-        $instructorUser->assignRole('instructor');
+        // Create/update users
+        $users = [
+            ['admin@lmsportal.com', 'Admin User', 'admin'],
+            ['instructor@lmsportal.com', 'Dr. Sarah Johnson', 'instructor'],
+            ['instructor2@lmsportal.com', 'Michael Chen', 'instructor'],
+            ['student@lmsportal.com', 'John Student', 'student'],
+            ['emma.wilson@example.com', 'Emma Wilson', 'student'],
+            ['david.kim@example.com', 'David Kim', 'student'],
+            ['sofia.garcia@example.com', 'Sofia Garcia', 'student'],
+            ['james.patel@example.com', 'James Patel', 'student'],
+        ];
 
-        $studentUser = User::create([
-            'name' => 'John Student',
-            'email' => 'student@lmsportal.com',
-            'password' => 'password',
-            'email_verified_at' => now(),
-        ]);
-        $studentUser->assignRole('student');
+        foreach ($users as [$email, $name, $role]) {
+            $user = User::updateOrCreate(
+                ['email' => $email],
+                ['name' => $name, 'password' => 'password', 'email_verified_at' => now()]
+            );
+            $user->syncRoles($role);
+        }
 
         $this->call(LearningSeeder::class);
+        $this->call(EnrollmentsSeeder::class);
         $this->call(QuizzesSeeder::class);
-        $this->call(SettingsSeeder::class);
+        $this->call(AssignmentsSeeder::class);
+        $this->call(LearningActivitySeeder::class);
+        $this->call(QuizActivitySeeder::class);
+        $this->call(AssignmentActivitySeeder::class);
+        $this->call(PaymentsSeeder::class);
+        $this->call(LiveClassesSeeder::class);
+        $this->call(GamificationSeeder::class);
+        $this->call(GamificationActivitySeeder::class);
+        $this->call(WishlistSeeder::class);
+        $this->call(ContactMessagesSeeder::class);
+        $this->call(NotificationsSeeder::class);
         $this->call(BlogSeeder::class);
+        $this->call(SettingsSeeder::class);
     }
 }

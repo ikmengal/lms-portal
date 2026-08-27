@@ -18,9 +18,16 @@
             .cert-sheet { width: 1100px; height: 777px; flex-shrink: 0; transform-origin: top center; }
             @media print {
                 .no-print { display: none !important; }
-                body { background: #fff !important; padding: 0 !important; margin: 0 !important; }
+                body { background: #fff !important; padding: 0 !important; margin: 0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
                 .cert-wrap { overflow: visible !important; height: auto !important; }
-                .cert-sheet { transform: none !important; box-shadow: none !important; margin: 0 !important; width: 297mm !important; height: 210mm !important; border-radius: 0 !important; }
+                .cert-sheet {
+                    transform: none !important; box-shadow: none !important; margin: 0 !important;
+                    width: 100% !important; height: 100vh !important; max-height: 210mm !important;
+                    border-radius: 0 !important;
+                    -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important;
+                }
+                .cert-sheet * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+                @page { size: A4 landscape; margin: 5mm; }
             }
         </style>
     </head>
@@ -131,36 +138,41 @@
 
                             {{-- Notary-style verification seal --}}
                             <div class="flex justify-center self-center" style="transform: rotate(-10deg);">
-                                <svg width="142" height="142" viewBox="0 0 170 170">
-                                    {{-- Serrated outer edge --}}
-                                    <circle cx="85" cy="85" r="80" fill="none" stroke="#ff7a11" stroke-width="7" stroke-dasharray="3.5 4.2"/>
-                                    {{-- Main ring --}}
-                                    <circle cx="85" cy="85" r="71" fill="rgba(255,122,17,.07)" stroke="#ff7a11" stroke-width="2.5"/>
-                                    {{-- Inner ring --}}
-                                    <circle cx="85" cy="85" r="49" fill="none" stroke="#ff7a11" stroke-width="1.5"/>
+                                @php $badgePath = \App\Models\Setting::get('certificate_badge'); @endphp
+                                @if($badgePath && \Illuminate\Support\Facades\Storage::disk('upload')->exists($badgePath))
+                                    <img src="{{ asset('assets/upload/' . $badgePath) }}" style="width: 170px; height: 170px; object-fit: contain;" alt="Certificate Badge" />
+                                @else
+                                    <svg width="170" height="170" viewBox="0 0 170 170">
+                                        {{-- Serrated outer edge --}}
+                                        <circle cx="85" cy="85" r="80" fill="none" stroke="#ff7a11" stroke-width="7" stroke-dasharray="3.5 4.2"/>
+                                        {{-- Main ring --}}
+                                        <circle cx="85" cy="85" r="71" fill="rgba(255,122,17,.07)" stroke="#ff7a11" stroke-width="2.5"/>
+                                        {{-- Inner ring --}}
+                                        <circle cx="85" cy="85" r="49" fill="none" stroke="#ff7a11" stroke-width="1.5"/>
 
-                                    <defs>
-                                        <path id="sealArcTop" d="M 85,85 m -60,0 a 60,60 0 1,1 120,0"/>
-                                        <path id="sealArcBottom" d="M 85,85 m -60,0 a 60,60 0 1,0 120,0"/>
-                                    </defs>
-                                    <text fill="#ffb37a" font-size="12" font-weight="bold" letter-spacing="3" font-family="Arial, sans-serif">
-                                        <textPath href="#sealArcTop" startOffset="50%" text-anchor="middle">OFFICIALLY VERIFIED</textPath>
-                                    </text>
-                                    <text fill="#ffb37a" font-size="10" font-weight="bold" letter-spacing="2.5" font-family="Arial, sans-serif">
-                                        <textPath href="#sealArcBottom" startOffset="50%" text-anchor="middle">&#9733; LMS PORTAL &#9733;</textPath>
-                                    </text>
+                                        <defs>
+                                            <path id="sealArcTop" d="M 85,85 m -60,0 a 60,60 0 1,1 120,0"/>
+                                            <path id="sealArcBottom" d="M 85,85 m -60,0 a 60,60 0 1,0 120,0"/>
+                                        </defs>
+                                        <text fill="#ffb37a" font-size="12" font-weight="bold" letter-spacing="3" font-family="Arial, sans-serif">
+                                            <textPath href="#sealArcTop" startOffset="50%" text-anchor="middle">OFFICIALLY VERIFIED</textPath>
+                                        </text>
+                                        <text fill="#ffb37a" font-size="10" font-weight="bold" letter-spacing="2.5" font-family="Arial, sans-serif">
+                                            <textPath href="#sealArcBottom" startOffset="50%" text-anchor="middle">&#9733; LMS PORTAL &#9733;</textPath>
+                                        </text>
 
-                                    {{-- Side separators --}}
-                                    <circle cx="25" cy="85" r="2.5" fill="#ff9638"/>
-                                    <circle cx="145" cy="85" r="2.5" fill="#ff9638"/>
+                                        {{-- Side separators --}}
+                                        <circle cx="25" cy="85" r="2.5" fill="#ff9638"/>
+                                        <circle cx="145" cy="85" r="2.5" fill="#ff9638"/>
 
-                                    {{-- Center certification --}}
-                                    <circle cx="85" cy="73" r="15" fill="#f05e07"/>
-                                    <path d="M78 73l4.5 4.5 9-9" stroke="#ffffff" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <line x1="66" y1="97" x2="104" y2="97" stroke="#ff7a11" stroke-width="1"/>
-                                    <text x="85" y="110" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="bold" letter-spacing="2.5" font-family="Arial, sans-serif">CERTIFIED</text>
-                                    <text x="85" y="123" text-anchor="middle" fill="#ffb37a" font-size="8.5" letter-spacing="2" font-family="Arial, sans-serif">{{ $certificate->issued_at->format('Y') }}</text>
-                                </svg>
+                                        {{-- Center certification --}}
+                                        <circle cx="85" cy="73" r="15" fill="#f05e07"/>
+                                        <path d="M78 73l4.5 4.5 9-9" stroke="#ffffff" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <line x1="66" y1="97" x2="104" y2="97" stroke="#ff7a11" stroke-width="1"/>
+                                        <text x="85" y="110" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="bold" letter-spacing="2.5" font-family="Arial, sans-serif">CERTIFIED</text>
+                                        <text x="85" y="123" text-anchor="middle" fill="#ffb37a" font-size="8.5" letter-spacing="2" font-family="Arial, sans-serif">{{ $certificate->issued_at->format('Y') }}</text>
+                                    </svg>
+                                @endif
                             </div>
 
                             <div class="flex flex-col items-center">

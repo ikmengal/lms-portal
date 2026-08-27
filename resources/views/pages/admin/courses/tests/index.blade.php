@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 @section('title', 'Tests & Exams')
 @section('content')
-    <div class="max-w-4xl mx-auto space-y-6">
+    <div class="max mx-auto space-y-6">
         {{-- Header --}}
         <div class="flex items-center gap-3">
             <a href="{{ route('admin.courses.index') }}" class="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition">
@@ -50,9 +50,15 @@
                             </div>
                             <p class="text-xs text-gray-400 mt-1">
                                 {{ $quiz->questions->count() }} questions · Pass ≥ {{ $quiz->passing_score }}% · {{ $quiz->attempts->count() }} attempts
-                                @if($quiz->duration_minutes) · ⏱ {{ $quiz->duration_minutes }} min@endif
-                                @if($quiz->max_attempts) · {{ $quiz->max_attempts }} attempt limit@endif
-                                @if($quiz->shuffle_questions || $quiz->shuffle_options) · 🔀 randomized@endif
+                                @if($quiz->duration_minutes)
+                                    · ⏱ {{ $quiz->duration_minutes }} min
+                                @endif
+                                @if($quiz->max_attempts)
+                                    · {{ $quiz->max_attempts }} attempt limit
+                                @endif
+                                @if($quiz->shuffle_questions || $quiz->shuffle_options)
+                                    · randomized
+                                @endif
                             </p>
                         </div>
                     </div>

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class SettingController extends Controller
 {
-    private const IMAGE_FIELDS = ['logo', 'dark_logo', 'favicon', 'banner'];
+    private const IMAGE_FIELDS = ['logo', 'dark_logo', 'favicon', 'banner', 'certificate_badge', 'hero_image'];
 
     public function edit()
     {
@@ -27,6 +27,14 @@ class SettingController extends Controller
             'dark_logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,svg,webp', 'max:2048'],
             'favicon' => ['nullable', 'file', 'mimes:ico,png,jpg,jpeg,svg', 'max:1024'],
             'banner' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'certificate_badge' => ['nullable', 'image', 'mimes:jpg,jpeg,png,svg,webp', 'max:4096'],
+
+            // Hero
+            'hero_badge' => ['nullable', 'string', 'max:255'],
+            'hero_title' => ['nullable', 'string', 'max:255'],
+            'hero_title_highlight' => ['nullable', 'string', 'max:255'],
+            'hero_description' => ['nullable', 'string', 'max:500'],
+            'hero_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
 
             // About
             'about_title' => ['nullable', 'string', 'max:255'],
@@ -79,6 +87,10 @@ class SettingController extends Controller
             'meta_keywords',
             'copyright_text',
             'maintenance_message',
+            'hero_badge',
+            'hero_title',
+            'hero_title_highlight',
+            'hero_description',
         ];
 
         $payload = [];
@@ -106,7 +118,7 @@ class SettingController extends Controller
         abort_unless(in_array($key, self::IMAGE_FIELDS, true), 404);
 
         if ($value = Setting::get($key)) {
-            Storage::disk('public')->delete($value);
+            Storage::disk('upload')->delete($value);
             Setting::set($key, null);
         }
 
@@ -116,9 +128,9 @@ class SettingController extends Controller
     private function storeImage(\Illuminate\Http\UploadedFile $file, string $field): void
     {
         if ($old = Setting::get($field)) {
-            Storage::disk('public')->delete($old);
+            Storage::disk('upload')->delete($old);
         }
 
-        Setting::set($field, $file->store('settings/branding', 'public'));
+        Setting::set($field, $file->store('settings/branding', 'upload'));
     }
 }

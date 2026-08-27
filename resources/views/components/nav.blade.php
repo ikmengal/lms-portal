@@ -25,7 +25,7 @@
             {{-- Logo --}}
             <a href="{{ route('home') }}" class="flex items-center gap-2 shrink-0">
                 @if(!empty($site['logo']))
-                    <img src="{{ asset('storage/' . $site['logo']) }}" alt="{{ $site['site_name'] ?? 'LMS Portal' }}" class="h-9 w-auto max-w-[180px] object-contain">
+                    <img src="{{ asset('assets/upload/' . $site['logo']) }}" alt="{{ $site['site_name'] ?? 'LMS Portal' }}" class="h-9 w-auto max-w-[180px] object-contain">
                 @else
                     <div class="w-9 h-9 bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg flex items-center justify-center">
                         <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

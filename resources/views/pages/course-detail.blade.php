@@ -1,5 +1,12 @@
 @extends('layouts.app')
-@section('title', $course->title)
+@php
+    $lang = content_lang();
+    $availableLangs = array_values(array_unique(array_merge(
+        [$course->language_code],
+        array_keys($course->translations ?? [])
+    )));
+@endphp
+@section('title', $course->localize('title', $lang))
 @section('content')
     {{-- Course Hero --}}
     <div class="bg-gradient-to-r from-primary-900 to-primary-800 py-12">
@@ -9,7 +16,7 @@
                 <span>/</span>
                 <a href="{{ route('courses.index') }}" class="hover:text-white transition">Courses</a>
                 <span>/</span>
-                <span class="text-white">{{ $course->title }}</span>
+                <span class="text-white">{{ $course->localize('title', $lang) }}</span>
             </div>
         </div>
     </div>
@@ -38,7 +45,7 @@
                         @endif
                     </div>
                     <div class="flex items-start justify-between gap-4 mb-4">
-                        <h1 class="text-3xl md:text-4xl font-bold text-gray-900">{{ $course->title }}</h1>
+                        <h1 class="text-3xl md:text-4xl font-bold text-gray-900">{{ $course->localize('title', $lang) }}</h1>
                         @auth
                             <form method="POST" action="{{ route('courses.wishlist', $course) }}" class="shrink-0 pt-1">
                                 @csrf
@@ -49,8 +56,36 @@
                             </form>
                         @endauth
                     </div>
-                    @if($course->description)
-                        <p class="text-lg text-gray-600 leading-relaxed mb-6">{{ $course->description }}</p>
+                    @if($course->localize('subtitle', $lang))
+                        <p class="text-base text-primary-700 font-medium mb-4">{{ $course->localize('subtitle', $lang) }}</p>
+                    @endif
+                    @if($course->localize('description', $lang))
+                        <p class="text-lg text-gray-600 leading-relaxed mb-6">{{ $course->localize('description', $lang) }}</p>
+                    @endif
+
+                    @if(count($availableLangs) > 1)
+                        <div class="flex flex-wrap items-center gap-2 mb-6">
+                            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Language:</span>
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                @foreach($availableLangs as $lc)
+                                    @php
+                                        $li = \language_info($lc);
+                                    @endphp
+                                    @if($li)
+                                        @php
+                                            $active = ($lang ?? $course->language_code) === $lc;
+                                        @endphp
+                                        <a href="{{ request()->fullUrlWithQuery(['lang' => $lc]) }}"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition {{ $active ? 'bg-primary-600 border-primary-600 text-white' : 'bg-white border-gray-200 text-gray-600 hover:border-primary-300' }}">
+                                            {{ $li['flag'] }} {{ $li['native'] }}
+                                        </a>
+                                    @endif
+                                @endforeach
+                            </div>
+                            @if($lang)
+                                <a href="{{ request()->fullUrlWithQuery(['lang' => null]) }}" class="text-xs text-gray-400 hover:text-primary-600 transition ml-1">Reset</a>
+                            @endif
+                        </div>
                     @endif
 
                     <div class="flex flex-wrap items-center gap-4 text-sm">
@@ -103,8 +138,8 @@
                 <div x-show="activeTab === 'overview'" x-transition>
                     <h2 class="text-2xl font-bold text-gray-900 mb-4">About This Course</h2>
                     <div class="prose prose-gray max-w-none text-gray-600 leading-relaxed space-y-4">
-                        @if($course->description)
-                            {!! nl2br(e($course->description)) !!}
+                        @if($course->localize('description', $lang))
+                            {!! nl2br(e($course->localize('description', $lang))) !!}
                         @else
                             <p>Enroll in this course to master the skills covered across its {{ $course->modules->count() }} modules, taught step by step by {{ $course->instructor->name ?? 'our expert instructor' }}.</p>
                         @endif
@@ -115,7 +150,7 @@
                                 @foreach($course->modules as $module)
                                     <div class="flex items-start gap-2">
                                         <svg class="w-5 h-5 text-secondary-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                        <span class="text-sm text-gray-600">{{ \Illuminate\Support\Str::ucfirst(\Illuminate\Support\Str::lower($module->title)) }}</span>
+                                        <span class="text-sm text-gray-600">{{ \Illuminate\Support\Str::ucfirst(\Illuminate\Support\Str::lower($module->localize('title', $lang))) }}</span>
                                     </div>
                                 @endforeach
                             </div>
@@ -207,21 +242,34 @@
                                     $moduleMinutes = $module->lessons->sum('duration_minutes');
                                     $mHours = intdiv($moduleMinutes, 60);
                                     $mMins = $moduleMinutes % 60;
+                                    $moduleLocked = $module->unlocks_at && $module->unlocks_at->isFuture();
                                 @endphp
                                 <div class="border border-gray-200 rounded-xl overflow-hidden" x-data="{ open: {{ $i === 0 ? 'true' : 'false' }} }">
                                     <button @click="open = !open" class="w-full flex items-center justify-between px-6 py-4 bg-gray-50 hover:bg-gray-100 transition text-left">
                                         <div>
-                                            <h3 class="font-semibold text-gray-900">Module {{ $i + 1 }}: {{ $module->title }}</h3>
+                                            <div class="flex items-center gap-2">
+                                                <h3 class="font-semibold {{ $moduleLocked ? 'text-gray-500' : 'text-gray-900' }}">Module {{ $i + 1 }}: {{ $module->localize('title', $lang) }}</h3>
+                                                @if($moduleLocked)
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-violet-50 text-violet-700 text-[11px] font-semibold rounded-md whitespace-nowrap">
+                                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"/></svg>
+                                                        Unlocks {{ $module->unlocks_at->format('M j') }}
+                                                    </span>
+                                                @endif
+                                            </div>
                                             <p class="text-xs text-gray-500 mt-1">{{ $module->lessons->count() }} lectures &middot; @if($mHours){{ $mHours }}h @endif @if($mMins){{ $mMins }}m @endif</p>
                                         </div>
                                         <svg class="w-5 h-5 text-gray-400 transition" :class="open && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                                     </button>
                                     <div x-show="open" x-transition class="px-6 py-4 space-y-3" style="display:none;">
                                         @forelse($module->lessons as $li => $lesson)
+                                            @php $lessonLocked = ($module->unlocks_at && $module->unlocks_at->isFuture()) || ($lesson->unlocks_at && $lesson->unlocks_at->isFuture()); @endphp
                                             <div class="flex items-center justify-between">
                                                 <div class="flex items-center gap-3">
-                                                    <span class="w-6 h-6 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center text-xs font-semibold shrink-0">{{ $li + 1 }}</span>
-                                                    <span class="text-sm text-gray-700">{{ $lesson->title }}</span>
+                                                    <span class="w-6 h-6 {{ $lessonLocked ? 'bg-gray-100 text-gray-400' : 'bg-primary-50 text-primary-600' }} rounded-full flex items-center justify-center text-xs font-semibold shrink-0">{{ $li + 1 }}</span>
+                                                    <span class="text-sm {{ $lessonLocked ? 'text-gray-400' : 'text-gray-700' }}">{{ $lesson->localize('title', $lang) }}</span>
+                                                    @if($lessonLocked)
+                                                        <svg class="w-3.5 h-3.5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"/></svg>
+                                                    @endif
                                                 </div>
                                                 <span class="text-xs text-gray-400 shrink-0">{{ $lesson->duration_minutes }} min</span>
                                             </div>
@@ -377,6 +425,30 @@
                                 </button>
                                 <p class="text-center text-xs text-gray-400 mt-3">Complete all lessons to earn your certificate.</p>
                             @endif
+                        </div>
+                    @elseif($comingSoon)
+                        {{-- Coming Soon --}}
+                        <div class="p-6 border-b border-gray-100">
+                            <div class="flex items-baseline gap-3 mb-4">
+                                <span class="text-3xl font-bold text-gray-900">${{ number_format($course->price, 2) }}</span>
+                            </div>
+                            <div class="rounded-xl bg-violet-50 border border-violet-100 p-5 mb-4">
+                                <div class="flex items-center justify-center gap-2 mb-2">
+                                    <svg class="w-6 h-6 text-violet-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 001.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+                                    <span class="font-bold text-violet-700">Coming Soon</span>
+                                </div>
+                                <p class="text-sm text-violet-700 font-semibold text-center">Enrollment opens {{ $unlocksAt->format('M j, Y') }}</p>
+                                <p class="text-xs text-violet-500 mt-1 text-center">All modules and lessons unlock automatically on this date.</p>
+                            </div>
+                            @auth
+                                <form method="POST" action="{{ route('courses.wishlist', $course) }}" class="mt-3">
+                                    @csrf
+                                    <button type="submit" class="w-full py-3.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition">
+                                        @if($wishlisted) Remove from Wishlist @else Add to Wishlist @endif
+                                    </button>
+                                </form>
+                            @endauth
+                            <p class="text-center text-xs text-gray-400 mt-3">30-Day Money-Back Guarantee</p>
                         </div>
                     @else
                         {{-- Price --}}

@@ -2,15 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\{Certificate, ContactMessage, Course, Lesson, LiveClass, QuizAttempt, User};
-use App\Notifications\InAppNotification;
+use App\Models\{AssignmentSubmission, Certificate, ContactMessage, Course, Lesson, LiveClass, QuizAttempt, User};
+use App\Notifications\LmsNotification;
 use Illuminate\Support\Facades\Notification as Facade;
 use Illuminate\Support\Facades\Route;
 
 class Notifier
 {
     /**
-     * Send an in-app notification to one or many users. Fails silently
+     * Send a notification (in-app + email) to one or many users. Fails silently
      * (reported) so a notification problem never breaks the main flow.
      */
     public static function send(User|iterable $users, string $type, string $title, string $body = '', ?string $url = null, array $extra = []): void
@@ -18,13 +18,70 @@ class Notifier
         $users = $users instanceof User ? [$users] : $users;
 
         try {
-            Facade::send($users, new InAppNotification($type, $title, $body, $url, $extra));
+            Facade::send($users, new LmsNotification($type, $title, $body, $url, $extra));
         } catch (\Throwable $e) {
             report($e);
         }
     }
 
     // ---------------- Events ----------------
+
+    /** Admin created a new course → notify the assigned instructor + all students. */
+    public static function courseCreated(Course $course): void
+    {
+        // Notify the assigned instructor
+        if ($instructor = $course->instructor) {
+            self::send(
+                $instructor,
+                'course_created',
+                "New course assigned to you: {$course->title}",
+                "You've been assigned as the instructor for \"{$course->title}\". Start building the curriculum now.",
+                route('admin.courses.show', $course),
+            );
+        }
+
+        // Notify all students (users with student role)
+        $students = User::role('student')->get();
+
+        if ($students->isNotEmpty()) {
+            self::send(
+                $students,
+                'course_published',
+                "New course available: {$course->title}",
+                "A new course \"{$course->title}\" has just been published. Check it out and enroll now!",
+                route('courses.show', $course),
+            );
+        }
+    }
+
+    /** Admin updated a course → notify the instructor + enrolled students. */
+    public static function courseUpdated(Course $course): void
+    {
+        // Notify the instructor
+        if ($instructor = $course->instructor) {
+            self::send(
+                $instructor,
+                'course_updated',
+                "Course updated: {$course->title}",
+                "The course \"{$course->title}\" has been updated. Review the changes.",
+                route('admin.courses.show', $course),
+            );
+        }
+
+        // Notify enrolled students
+        $students = User::whereHas('enrollments', fn ($q) => $q->where('course_id', $course->id))
+            ->get();
+
+        if ($students->isNotEmpty()) {
+            self::send(
+                $students,
+                'course_updated',
+                "Course updated: {$course->title}",
+                "The course you're enrolled in has been updated with new content or changes.",
+                route('learn.start', $course),
+            );
+        }
+    }
 
     /** Student enrolled in a course → welcome the student, alert the instructor. */
     public static function courseEnrolled(User $student, Course $course): void
@@ -92,6 +149,53 @@ class Notifier
                 );
             }
         }
+    }
+
+    // ---------------- Assignment Events ----------------
+
+    /** Student submitted an assignment file → notify instructor. */
+    public static function assignmentSubmitted(AssignmentSubmission $submission): void
+    {
+        $quiz = $submission->quiz;
+        if (!$quiz) {
+            return;
+        }
+
+        $course = $quiz->course()->withTrashed()->first();
+        if ($course?->instructor) {
+            self::send(
+                $course->instructor,
+                'assignment_submitted',
+                "{$submission->user->name} submitted \"{$quiz->title}\"",
+                'A new file submission has been uploaded for review.',
+                Route::has('admin.courses.assignments.submissions')
+                    ? route('admin.courses.assignments.submissions', [$course, $quiz])
+                    : null,
+            );
+        }
+    }
+
+    /** Instructor graded an assignment → notify student. */
+    public static function assignmentGraded(AssignmentSubmission $submission): void
+    {
+        $quiz = $submission->quiz;
+        if (!$quiz) {
+            return;
+        }
+
+        $course = $quiz->course()->withTrashed()->first();
+        $score = $submission->marks !== null ? number_format($submission->marks, 1) . '%' : null;
+        $passed = $submission->marks !== null && $submission->marks >= ($quiz->passing_score ?? 60);
+
+        self::send(
+            $submission->user,
+            'assignment_result',
+            ($passed ? 'Passed' : 'Graded') . ": {$quiz->title}",
+            $score ? "Your grade: {$score}" : 'Your assignment has been graded.',
+            Route::has('courses.assignments.show') && $course
+                ? route('courses.assignments.show', [$course, $quiz])
+                : null,
+        );
     }
 
     /** Certificate issued → student. */

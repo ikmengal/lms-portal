@@ -3,8 +3,8 @@
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\{
-    CourseContentController,
     ContactMessageController,
+    CourseContentController,
     PermissionController,
     CategoryController,
     LevelController,
@@ -13,15 +13,17 @@ use App\Http\Controllers\Admin\{
     RoleController
 };
 use App\Http\Controllers\{
-    DashboardController,
     NotificationController,
-    ProfileController,
     QuizAttemptController,
+    DashboardController,
+    LiveClassController,
+    ProfileController,
     SettingController,
     CourseController,
+    LearnController,
     AuthController,
     HomeController,
-    PageController
+    PageController,
 };
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -85,7 +87,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/instructor/earnings', [DashboardController::class, 'earnings'])->name('instructor.earnings');
 
     // Learning / Watch area
-    Route::controller(\App\Http\Controllers\LearnController::class)->group(function () {
+    Route::controller(LearnController::class)->group(function () {
         Route::get('/learn/{course}', 'start')->name('learn.start');
         Route::get('/learn/{course}/{lesson}', 'show')->name('learn.show');
         Route::post('/learn/{course}/{lesson}/complete', 'toggleComplete')->name('learn.complete');
@@ -94,6 +96,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/learn/resources/{resource}/download', 'downloadResource')->name('learn.resources.download');
         Route::post('/learn/{course}/{lesson}/questions', 'storeQuestion')->name('learn.questions.store');
         Route::delete('/learn/questions/{discussion}', 'destroyQuestion')->name('learn.questions.destroy');
+        Route::post('/learn/questions/{discussion}/upvote', 'toggleUpvote')->name('learn.questions.upvote');
+        Route::post('/learn/questions/{discussion}/answer', 'markAnswered')->name('learn.questions.answer');
+        Route::post('/learn/{course}/{lesson}/video-progress', 'saveVideoProgress')->name('learn.video-progress.save');
+        Route::get('/learn/{course}/{lesson}/video-progress', 'getVideoProgress')->name('learn.video-progress.get');
     });
 
     // Certificates
@@ -118,12 +124,30 @@ Route::middleware('auth')->group(function () {
         Route::post('/checkout/process', 'process')->name('checkout.process');
         Route::get('/receipts/{payment}', 'showReceipt')->name('receipts.show');
         Route::post('/courses/{course}/enroll-free', 'enrollFree')->name('courses.enroll.free');
+        Route::post('/checkout/apply-coupon', 'applyCoupon')->name('checkout.apply-coupon');
+        Route::get('/checkout/remove-coupon', 'removeCoupon')->name('checkout.remove-coupon');
     });
 
     // Take Tests (enrolled students)
     Route::get('/courses/{course}/tests/{quiz}', [QuizAttemptController::class, 'show'])->name('courses.tests.show');
     Route::post('/courses/{course}/tests/{quiz}', [QuizAttemptController::class, 'submit'])->name('courses.tests.submit');
     Route::get('/quiz-history', [QuizAttemptController::class, 'history'])->name('quiz.history');
+
+    // Assignments (enrolled students)
+    Route::get('/courses/{course}/assignments/{quiz}', [\App\Http\Controllers\AssignmentController::class, 'show'])->name('courses.assignments.show');
+    Route::post('/courses/{course}/assignments/{quiz}/submit', [\App\Http\Controllers\AssignmentController::class, 'submit'])->name('courses.assignments.submit');
+    Route::get('/assignments/submissions/{submission}/download', [\App\Http\Controllers\AssignmentController::class, 'download'])->name('assignments.download');
+    Route::get('/assignment-history', [\App\Http\Controllers\AssignmentController::class, 'history'])->name('assignment.history');
+
+    // Live Classes (students)
+    Route::get('/live-classes', [LiveClassController::class, 'index'])->name('live-classes.index');
+    Route::post('/live-classes/{liveClass}/join', [LiveClassController::class, 'join'])->name('live-classes.join');
+    Route::post('/live-classes/{liveClass}/leave', [LiveClassController::class, 'leave'])->name('live-classes.leave');
+
+    // Gamification
+    Route::get('/gamification', [\App\Http\Controllers\GamificationController::class, 'index'])->name('gamification.index');
+    Route::get('/gamification/badges', [\App\Http\Controllers\GamificationController::class, 'badges'])->name('gamification.badges');
+    Route::get('/gamification/leaderboard', [\App\Http\Controllers\GamificationController::class, 'leaderboard'])->name('gamification.leaderboard');
 });
 
     // Shared Course Management (admins manage all, instructors manage their own)
@@ -144,6 +168,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () { 
     Route::post('/courses/{course}/live-classes', [\App\Http\Controllers\Admin\LiveClassController::class, 'store'])->name('courses.live-classes.store');
     Route::put('/courses/{course}/live-classes/{liveClass}', [\App\Http\Controllers\Admin\LiveClassController::class, 'update'])->name('courses.live-classes.update');
     Route::delete('/courses/{course}/live-classes/{liveClass}', [\App\Http\Controllers\Admin\LiveClassController::class, 'destroy'])->name('courses.live-classes.destroy');
+    Route::get('/courses/{course}/live-classes/{liveClass}/attendance', [\App\Http\Controllers\Admin\LiveClassController::class, 'attendance'])->name('courses.live-classes.attendance');
 
     Route::post('/courses/{course}/modules', [CourseContentController::class, 'storeModule'])->name('modules.store');
     Route::put('/modules/{module}', [CourseContentController::class, 'updateModule'])->name('modules.update');
@@ -162,12 +187,29 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () { 
     Route::get('/courses/{course}/tests/{quiz}/edit', [QuizController::class, 'edit'])->name('courses.tests.edit');
     Route::put('/courses/{course}/tests/{quiz}', [QuizController::class, 'update'])->name('courses.tests.update');
     Route::delete('/courses/{course}/tests/{quiz}', [QuizController::class, 'destroy'])->name('courses.tests.destroy');
+
+    // Assignments
+    Route::get('/courses/{course}/assignments', [\App\Http\Controllers\Admin\AssignmentController::class, 'index'])->name('courses.assignments.index');
+    Route::get('/courses/{course}/assignments/create', [\App\Http\Controllers\Admin\AssignmentController::class, 'create'])->name('courses.assignments.create');
+    Route::post('/courses/{course}/assignments', [\App\Http\Controllers\Admin\AssignmentController::class, 'store'])->name('courses.assignments.store');
+    Route::get('/courses/{course}/assignments/{quiz}/edit', [\App\Http\Controllers\Admin\AssignmentController::class, 'edit'])->name('courses.assignments.edit');
+    Route::put('/courses/{course}/assignments/{quiz}', [\App\Http\Controllers\Admin\AssignmentController::class, 'update'])->name('courses.assignments.update');
+    Route::delete('/courses/{course}/assignments/{quiz}', [\App\Http\Controllers\Admin\AssignmentController::class, 'destroy'])->name('courses.assignments.destroy');
+    Route::get('/courses/{course}/assignments/{quiz}/submissions', [\App\Http\Controllers\Admin\AssignmentController::class, 'submissions'])->name('courses.assignments.submissions');
+    Route::get('/courses/{course}/assignments/{quiz}/submissions/{submission}/grade', [\App\Http\Controllers\Admin\AssignmentController::class, 'showGrade'])->name('courses.assignments.submissions.grade');
+    Route::post('/courses/{course}/assignments/{quiz}/submissions/{submission}/grade', [\App\Http\Controllers\Admin\AssignmentController::class, 'grade'])->name('courses.assignments.submissions.grade.store');
 });
 
 // Admin Routes
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     // Analytics Dashboard
     Route::get('/analytics', [\App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('analytics');
+
+    // Reports & Analysis
+    Route::controller(\App\Http\Controllers\Admin\ReportController::class)->prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/export', 'export')->name('export');
+    });
 
     // Contact Messages Inbox
     Route::controller(ContactMessageController::class)->prefix('messages')->name('messages.')->group(function () {
@@ -230,6 +272,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/courses/trash', [AdminCourseController::class, 'trash'])->name('courses.trash');
     Route::post('/courses/{id}/restore', [AdminCourseController::class, 'restore'])->name('courses.restore');
     Route::delete('/courses/{id}/force-delete', [AdminCourseController::class, 'forceDelete'])->name('courses.force-delete');
+
+    // Coupons
+    Route::controller(\App\Http\Controllers\Admin\CouponController::class)->prefix('coupons')->name('coupons.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::put('/{coupon}', 'update')->name('update');
+        Route::delete('/{coupon}', 'destroy')->name('destroy');
+        Route::post('/{coupon}/toggle', 'toggleActive')->name('toggle');
+    });
 
     // Website Settings
     Route::get('/settings', [SettingController::class, 'edit'])->name('settings');

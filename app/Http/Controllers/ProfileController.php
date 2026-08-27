@@ -48,7 +48,7 @@ class ProfileController extends Controller
             Auth::user(),
             'avatar',
             $validated['avatar'],
-            'avatars/' . Auth::id()
+            'users/avatar'
         );
 
         return back()->with('success', 'Profile picture updated successfully.');
@@ -71,7 +71,7 @@ class ProfileController extends Controller
             Auth::user(),
             'banner',
             $validated['banner'],
-            'banners/' . Auth::id()
+            'users/banner'
         );
 
         return back()->with('success', 'Banner image updated successfully.');
@@ -87,16 +87,16 @@ class ProfileController extends Controller
     private function replaceImage(User $user, string $field, $file, string $path): void
     {
         if ($old = $user->{$field}) {
-            Storage::disk('public')->delete($old);
+            Storage::disk('upload')->delete($old);
         }
 
-        $user->forceFill([$field => $file->store($path, 'public')])->save();
+        $user->forceFill([$field => $file->store($path, 'upload')])->save();
     }
 
     private function deleteImage(User $user, string $field): void
     {
         if ($old = $user->{$field}) {
-            Storage::disk('public')->delete($old);
+            Storage::disk('upload')->delete($old);
             $user->forceFill([$field => null])->save();
         }
     }
