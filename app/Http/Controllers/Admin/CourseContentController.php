@@ -4,10 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
-use App\Models\CourseModule;
 use Illuminate\Http\Request;
-use App\Models\Course;
-use App\Models\Lesson;
+use App\Services\Notifier;
+use App\Models\{
+    CourseModule,
+    LessonResource,
+    Course,
+    Lesson
+};
 
 class CourseContentController extends Controller
 {
@@ -109,7 +113,7 @@ class CourseContentController extends Controller
             'sort_order' => (int) $module->lessons()->max('sort_order') + 1,
         ]);
 
-        \App\Services\Notifier::newLesson($module->course, $module->lessons()->latest('id')->first());
+        Notifier::newLesson($module->course, $module->lessons()->latest('id')->first());
 
         return back()->with('success', 'Lesson added successfully.');
     }

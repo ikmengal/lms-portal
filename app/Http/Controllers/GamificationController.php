@@ -24,10 +24,7 @@ class GamificationController extends Controller
         $recentXp = XpTransaction::where('user_id', $user->id)->latest()->take(10)->get();
         $leaderboard = GamificationService::leaderboard(10);
 
-        return view('pages.student.gamification', compact(
-            'totalXp', 'level', 'xpProgress', 'xpForNext', 'rank',
-            'streak', 'badges', 'recentXp', 'leaderboard'
-        ));
+        return view('pages.student.gamification', get_defined_vars());
     }
 
     public function badges()
@@ -36,7 +33,7 @@ class GamificationController extends Controller
         $allBadges = Badge::where('is_active', true)->orderBy('category')->orderBy('sort_order')->get();
         $earnedBadgeIds = $user->badges()->pluck('badge_id')->toArray();
 
-        return view('pages.student.badges', compact('allBadges', 'earnedBadgeIds'));
+        return view('pages.student.badges', get_defined_vars());
     }
 
     public function leaderboard()
@@ -44,6 +41,6 @@ class GamificationController extends Controller
         $leaderboard = GamificationService::leaderboard(50);
         $myRank = GamificationService::rank(auth()->user());
 
-        return view('pages.student.leaderboard', compact('leaderboard', 'myRank'));
+        return view('pages.student.leaderboard', get_defined_vars());
     }
 }

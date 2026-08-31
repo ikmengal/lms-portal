@@ -119,13 +119,6 @@ class AnalyticsController extends Controller
             ->take(5)
             ->values();
 
-        return view('pages.admin.analytics', compact(
-            'totalStudents', 'newStudents30d', 'activeStudents',
-            'totalEnrollments', 'enrollmentsThisMonth', 'completedEnrollments', 'completionRate', 'avgProgress',
-            'progressBuckets', 'totalRevenue', 'revenueThisMonth', 'paymentsCount', 'monthlyRevenue', 'maxMonthlyRevenue',
-            'instructorEarnings', 'maxInstructorRevenue',
-            'popularCourses', 'maxCourseEnrollments',
-            'totalAttempts', 'avgQuizScore', 'passRate', 'quizPerformanceByQuiz'
-        ));
+        return view('pages.admin.analytics', get_defined_vars());
     }
 }

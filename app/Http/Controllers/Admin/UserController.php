@@ -24,14 +24,14 @@ class UserController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('pages.admin.users', compact('users', 'roles'));
+        return view('pages.admin.users', get_defined_vars());
     }
 
     public function create()
     {
         $roles = Role::pluck('name');
 
-        return view('pages.admin.users.create', compact('roles'));
+        return view('pages.admin.users.create', get_defined_vars());
     }
 
     public function store(Request $request)

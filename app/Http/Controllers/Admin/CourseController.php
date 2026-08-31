@@ -3,15 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Course;
-use App\Models\CourseCategory;
-use App\Models\CourseLevel;
-use App\Models\User;
-use App\Services\Notifier;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use App\Services\Notifier;
+use App\Models\{
+    CourseCategory,
+    CourseLevel,
+    Course,
+    User
+};
 
 class CourseController extends Controller
 {

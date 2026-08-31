@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\AssignmentSubmission;
-use App\Models\Course;
-use App\Models\Quiz;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use App\Services\Notifier;
+use App\Models\{
+    AssignmentSubmission,
+    Course,
+    Quiz
+};
 
 class AssignmentController extends Controller
 {
@@ -29,7 +32,7 @@ class AssignmentController extends Controller
             ->latest()
             ->get();
 
-        return view('pages.admin.courses.assignments.index', compact('course', 'assignments'));
+        return view('pages.admin.courses.assignments.index', get_defined_vars());
     }
 
     public function create(Course $course)
@@ -65,7 +68,8 @@ class AssignmentController extends Controller
         $this->authorizeCourse($course);
         abort_unless($quiz->course_id === $course->id && $quiz->isAssignment(), 404);
 
-        return view('pages.admin.courses.assignments.form', compact('course', 'quiz'));
+        // return view('pages.admin.courses.assignments.form', compact('course', 'quiz'));
+        return view('pages.admin.courses.assignments.form', get_defined_vars());
     }
 
     public function update(Request $request, Course $course, Quiz $quiz)
@@ -101,7 +105,7 @@ class AssignmentController extends Controller
             ->latest('submitted_at')
             ->get();
 
-        return view('pages.admin.courses.assignments.submissions', compact('course', 'quiz', 'submissions'));
+        return view('pages.admin.courses.assignments.submissions', get_defined_vars());
     }
 
     public function showGrade(Course $course, Quiz $quiz, AssignmentSubmission $submission)
@@ -112,7 +116,7 @@ class AssignmentController extends Controller
 
         $submission->load('user');
 
-        return view('pages.admin.courses.assignments.grade', compact('course', 'quiz', 'submission'));
+        return view('pages.admin.courses.assignments.grade', get_defined_vars());
     }
 
     public function grade(Request $request, Course $course, Quiz $quiz, AssignmentSubmission $submission)
@@ -134,7 +138,7 @@ class AssignmentController extends Controller
             'graded_by' => auth()->id(),
         ]);
 
-        \App\Services\Notifier::assignmentGraded($submission);
+        Notifier::assignmentGraded($submission);
 
         return redirect()
             ->route('admin.courses.assignments.submissions', [$course, $quiz])

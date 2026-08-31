@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Quiz;
+use App\Models\QuizQuestion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -75,7 +76,7 @@ class QuizController extends Controller
 
         $quiz->load('questions.options');
 
-        return view('pages.admin.courses.tests.form', compact('course', 'quiz'));
+        return view('pages.admin.courses.tests.form', get_defined_vars());
     }
 
     public function update(Request $request, Course $course, Quiz $quiz)
@@ -151,7 +152,7 @@ class QuizController extends Controller
         $questions = collect($raw)
             ->filter(fn ($q) => filled($q['question'] ?? null))
             ->map(function ($q) {
-                $type = in_array($q['type'] ?? null, array_keys(\App\Models\QuizQuestion::TYPES), true)
+                $type = in_array($q['type'] ?? null, array_keys(QuizQuestion::TYPES), true)
                     ? $q['type']
                     : 'multiple_choice';
 

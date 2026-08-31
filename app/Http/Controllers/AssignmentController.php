@@ -29,7 +29,7 @@ class AssignmentController extends Controller
             ->map(fn ($ext) => trim(strtolower($ext)))
             ->values();
 
-        return view('pages.student.assignments.show', compact('course', 'quiz', 'submission', 'allowedExtensions'));
+        return view('pages.student.assignments.show', get_defined_vars('course', 'quiz', 'submission', 'allowedExtensions'));
     }
 
     public function submit(Request $request, Course $course, Quiz $quiz)
