@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Notifications\AccountActivationNotification;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
-use Illuminate\Routing\Controllers\HasMiddleware; // 1. Import this
-use Illuminate\Routing\Controllers\Middleware;    // 2. Import this
+use App\Notifications\AccountActivationNotification;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\{
+    Password, Auth, DB, Hash,
+    URL
+};
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use App\Models\User;
 
 class AuthController extends Controller
 {

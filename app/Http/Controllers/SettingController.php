@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Setting;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Setting;
+use Illuminate\Http\{
+    UploadedFile,
+    Request
+};
 
 class SettingController extends Controller
 {
@@ -125,7 +128,7 @@ class SettingController extends Controller
         return back()->with('success', ucfirst(str_replace('_', ' ', $key)) . ' removed successfully.');
     }
 
-    private function storeImage(\Illuminate\Http\UploadedFile $file, string $field): void
+    private function storeImage(UploadedFile $file, string $field): void
     {
         if ($old = Setting::get($field)) {
             Storage::disk('upload')->delete($old);

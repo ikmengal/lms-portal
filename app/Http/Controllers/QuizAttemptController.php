@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Course;
-use App\Models\Quiz;
-use App\Models\QuizAttempt;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use App\Services\{
+    GamificationService,
+    Notifier
+};
+use App\Models\{
+    QuizAttempt,
+    Course,
+    Quiz
+};
 
 class QuizAttemptController extends Controller
 {
@@ -197,10 +203,10 @@ class QuizAttemptController extends Controller
         $message = ($score >= $quiz->passing_score ? 'Passed! ' : '') . 'Auto-graded score: ' . number_format($score, 1) . '%'
             . ($quiz->duration_minutes ? ' · Time used: ' . $attempt->formattedTimeSpent() : '');
 
-        \App\Services\Notifier::quizResult($attempt->refresh());
+        Notifier::quizResult($attempt->refresh());
 
         if ($attempt->passed) {
-            \App\Services\GamificationService::recordQuizPassed(auth()->user(), $attempt);
+            GamificationService::recordQuizPassed(auth()->user(), $attempt);
         }
 
         return redirect()

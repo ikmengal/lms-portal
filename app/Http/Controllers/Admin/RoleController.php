@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Cache;
+use App\Http\Controllers\Controller;
 use Spatie\Permission\Models\Role;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;

@@ -6,6 +6,9 @@ use Illuminate\Routing\Controllers\HasMiddleware; // 1. Import this
 use Illuminate\Routing\Controllers\Middleware;    // 2. Import this
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Services\{
+    GamificationService,
+};
 use App\Models\{
     ContactMessage,
     Certificate,
@@ -301,10 +304,10 @@ class DashboardController extends Controller
 
         $gamification = [
             'xp' => $user->xp ?? 0,
-            'level' => \App\Services\GamificationService::currentLevel($user),
-            'xpProgress' => \App\Services\GamificationService::xpProgressInLevel($user),
+            'level' => GamificationService::currentLevel($user),
+            'xpProgress' => GamificationService::xpProgressInLevel($user),
             'streak' => $user->streak?->current_streak ?? 0,
-            'rank' => \App\Services\GamificationService::rank($user),
+            'rank' => GamificationService::rank($user),
             'recentBadges' => $user->badges()->orderByPivot('earned_at', 'desc')->take(3)->get(),
         ];
 

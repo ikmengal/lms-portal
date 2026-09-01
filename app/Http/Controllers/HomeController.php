@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Course;
-use App\Models\CourseCategory;
-use App\Models\Enrollment;
 use Illuminate\Database\Query\Builder;
+use App\Models\{
+    CourseCategory,
+    Enrollment,
+    Course,
+    Review
+};
+
 
 class HomeController extends Controller
 {
@@ -43,7 +47,7 @@ class HomeController extends Controller
             'courses' => Course::count(),
             'instructors' => Course::distinct('instructor_id')->count('instructor_id'),
             'students' => Enrollment::distinct('user_id')->count('user_id'),
-            'avgRating' => round((float) \App\Models\Review::avg('rating'), 1),
+            'avgRating' => round((float) Review::avg('rating'), 1),
         ];
 
         return view('pages.home', compact(

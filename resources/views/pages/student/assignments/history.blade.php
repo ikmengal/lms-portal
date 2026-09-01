@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 @section('title', 'Assignment History')
 @section('content')
-    <div class="max-w-4xl mx-auto space-y-6">
+    <div class="max mx-auto space-y-6">
         {{-- Header --}}
         <div class="flex items-center gap-3">
             <div class="flex-1 min-w-0">

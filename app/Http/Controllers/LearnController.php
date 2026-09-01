@@ -2,22 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Course;
-use App\Models\CourseModule;
-use App\Models\Certificate;
-use App\Models\Discussion;
-use App\Models\DiscussionUpvote;
-use App\Models\Enrollment;
-use App\Models\Lesson;
-use App\Models\LessonNote;
-use App\Models\LessonProgress;
-use App\Models\LessonResource;
-use App\Models\VideoProgress;
+use Illuminate\Support\Facades\{
+    Storage, DB
+};
 use App\Support\ContentDrip;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Services\{
+    GamificationService,
+    Notifier
+};
+use App\Models\{
+    DiscussionUpvote,
+    LessonResource,
+    LessonProgress,
+    VideoProgress,
+    CourseModule,
+    Certificate,
+    QuizAttempt,
+    Discussion,
+    LessonNote,
+    Enrollment,
+    Course,
+    Lesson
+};
 
 class LearnController extends Controller
 {
@@ -98,7 +106,7 @@ class LearnController extends Controller
         $totalLessons = $flat->count();
         $doneCount = $completedIds->count();
 
-        $certificate = \App\Models\Certificate::where('user_id', auth()->id())
+        $certificate = Certificate::where('user_id', auth()->id())
             ->where('course_id', $course->id)
             ->first();
 
@@ -120,7 +128,7 @@ class LearnController extends Controller
         $attemptCounts = [];
 
         if ($quizzes->isNotEmpty()) {
-            $rows = \App\Models\QuizAttempt::where('user_id', auth()->id())
+            $rows = QuizAttempt::where('user_id', auth()->id())
                 ->whereIn('quiz_id', $quizzes->pluck('id'))
                 ->whereNotNull('completed_at')
                 ->selectRaw('quiz_id, MAX(score) as best, COUNT(*) as total')
@@ -203,7 +211,7 @@ class LearnController extends Controller
                 'completed_at' => now(),
             ]);
 
-            \App\Services\GamificationService::recordLessonComplete(auth()->user(), $lesson);
+            GamificationService::recordLessonComplete(auth()->user(), $lesson);
         }
 
         $this->syncEnrollment($course);
@@ -240,8 +248,8 @@ class LearnController extends Controller
                 'issued_at' => now(),
             ]);
 
-            \App\Services\Notifier::certificateIssued($certificate);
-            \App\Services\GamificationService::recordCourseCompleted(auth()->user(), $enrollment);
+            Notifier::certificateIssued($certificate);
+            GamificationService::recordCourseCompleted(auth()->user(), $enrollment);
         }
     }
 
@@ -298,12 +306,12 @@ class LearnController extends Controller
             'body' => $data['body'],
         ]);
 
-        \App\Services\GamificationService::recordDiscussionPost(auth()->user(), $discussion);
+        GamificationService::recordDiscussionPost(auth()->user(), $discussion);
 
         if (!empty($data['parent_id'])) {
             $parent = Discussion::with('user')->find($data['parent_id']);
             if ($parent && $parent->user_id !== auth()->id()) {
-                \App\Services\Notifier::send(
+                Notifier::send(
                     $parent->user,
                     'reply',
                     auth()->user()->name . ' replied to your question',

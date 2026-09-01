@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AssignmentSubmission;
-use App\Models\Course;
-use App\Models\Quiz;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use App\Services\Notifier;
+use App\Models\{
+    AssignmentSubmission,
+    Course,
+    Quiz
+};
 
 class AssignmentController extends Controller
 {
@@ -82,7 +85,7 @@ class AssignmentController extends Controller
             ]
         );
 
-        \App\Services\Notifier::assignmentSubmitted($submission);
+        Notifier::assignmentSubmitted($submission);
 
         return back()->with('success', 'Assignment submitted successfully.');
     }

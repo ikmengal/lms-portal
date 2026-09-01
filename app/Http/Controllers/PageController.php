@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BlogPost;
-use App\Models\Certificate;
-use App\Models\ContactMessage;
-use App\Models\Course;
-use App\Models\CourseCategory;
-use App\Models\Enrollment;
-use App\Models\Review;
-use App\Models\User;
+use App\Notifications\NewContactMessageNotification;
+use Illuminate\Support\Facades\{
+    Notification, DB
+};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\{
+    ContactMessage,
+    CourseCategory,
+    Certificate,
+    Enrollment,
+    BlogPost,
+    Review,
+    Course,
+    User
+};
 
 class PageController extends Controller
 {
@@ -49,9 +54,9 @@ class PageController extends Controller
 
         // Notify every admin via email + in-app notification.
         try {
-            \Illuminate\Support\Facades\Notification::send(
+            Notification::send(
                 User::role('admin')->get(),
-                new \App\Notifications\NewContactMessageNotification($message)
+                new NewContactMessageNotification($message)
             );
         } catch (\Throwable $e) {
             report($e); // Never block the contact form because of a mail failure.

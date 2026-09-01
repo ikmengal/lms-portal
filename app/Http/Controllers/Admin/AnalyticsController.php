@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Certificate, Course, Enrollment, LessonProgress, Payment, QuizAttempt, User};
+use Illuminate\Support\Facades\DB;
+use App\Models\{Certificate, Course, Enrollment, LessonProgress, Payment, QuizAttempt, User, Quiz};
 
 class AnalyticsController extends Controller
 {
@@ -75,9 +76,9 @@ class AnalyticsController extends Controller
             ->get([
                 'instructors.id',
                 'instructors.name',
-                \Illuminate\Support\Facades\DB::raw('SUM(payments.amount) as revenue'),
-                \Illuminate\Support\Facades\DB::raw('COUNT(DISTINCT courses.id) as courses_count'),
-                \Illuminate\Support\Facades\DB::raw('COUNT(payments.id) as sales_count'),
+                DB::raw('SUM(payments.amount) as revenue'),
+                DB::raw('COUNT(DISTINCT courses.id) as courses_count'),
+                DB::raw('COUNT(payments.id) as sales_count'),
             ]);
         $maxInstructorRevenue = max($instructorEarnings->max('revenue') ?? 0, 1);
 
@@ -104,7 +105,7 @@ class AnalyticsController extends Controller
         $passedAttempts = (clone $attemptsQuery)->where('passed', true)->count();
         $passRate = $totalAttempts > 0 ? round($passedAttempts / $totalAttempts * 100, 1) : 0;
 
-        $quizPerformanceByQuiz = \App\Models\Quiz::withTrashed()
+        $quizPerformanceByQuiz = Quiz::withTrashed()
             ->withCount(['attempts as attempts_count' => fn ($q) => $q->whereNotNull('completed_at')])
             ->addSelect([
                 'quizzes.*',

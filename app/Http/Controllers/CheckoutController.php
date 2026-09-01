@@ -2,15 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Course;
-use App\Models\Coupon;
-use App\Models\CouponUsage;
-use App\Models\Enrollment;
-use App\Models\Payment;
-use App\Support\ContentDrip;
+use Illuminate\Support\Facades\{
+    DB, Auth
+};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use App\Support\ContentDrip;
+use App\Services\{
+    GamificationService,
+    Notifier
+};
+use App\Models\{
+    CouponUsage,
+    Enrollment,
+    Course,
+    Coupon,
+    Payment
+};
 
 class CheckoutController extends Controller
 {
@@ -241,8 +248,8 @@ class CheckoutController extends Controller
 
         // Notify about brand-new enrollments only (not re-purchases).
         foreach ($newEnrollments as $course) {
-            \App\Services\Notifier::courseEnrolled(Auth::user(), $course);
-            \App\Services\GamificationService::recordFirstEnrollment(Auth::user());
+            Notifier::courseEnrolled(Auth::user(), $course);
+            GamificationService::recordFirstEnrollment(Auth::user());
         }
 
         // Clear applied coupon and purchased items from cart
@@ -325,7 +332,7 @@ class CheckoutController extends Controller
         ]);
 
         if ($enrollment->wasRecentlyCreated) {
-            \App\Services\Notifier::courseEnrolled(Auth::user(), $course);
+            Notifier::courseEnrolled(Auth::user(), $course);
         }
 
         if ($request->boolean('from_cart')) {

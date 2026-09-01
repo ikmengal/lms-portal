@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Badge;
-use App\Models\User;
-use App\Models\UserStreak;
-use App\Models\XpTransaction;
 use App\Services\GamificationService;
+use App\Models\{
+    XpTransaction,
+    UserStreak,
+    Badge, User
+};
 
 class GamificationController extends Controller
 {

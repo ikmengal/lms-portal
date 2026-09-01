@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Symfony\Component\HttpFoundation\Response;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Carbon;
+use Illuminate\Http\Request;
 use App\Models\{
     AssignmentSubmission,
     Certificate,
@@ -15,9 +18,6 @@ use App\Models\{
     Setting,
     User,
 };
-use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-use Symfony\Component\HttpFoundation\Response;
 
 class ReportController extends Controller
 {

@@ -3,12 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Support\ContentDrip;
+use App\Models\{
+    Certificate,
+    QuizAttempt,
+    Enrollment,
+    Wishlist,
+    Course
+};
 
 class CourseController extends Controller
 {
     public function index(Request $request)
     {
-        $query = \App\Models\Course::query()
+        $query = Course::query()
             ->with(['instructor:id,name', 'categoryTerm', 'levelTerm'])
             ->withCount(['enrollments as students_count'])
             ->withCount(['reviews as reviews_count'])
@@ -73,17 +81,17 @@ class CourseController extends Controller
         $courses = $query->paginate(9)->withQueryString();
 
         // ---- Filter UI data ----
-        $categories = \App\Models\CourseCategory::where('is_active', true)
+        $categories = CourseCategory::where('is_active', true)
             ->withCount(['courses as courses_count' => fn ($q) => $q->whereNull('deleted_at')])
             ->orderBy('name')
             ->get();
 
-        $levels = \App\Models\CourseLevel::where('is_active', true)
+        $levels = CourseLevel::where('is_active', true)
             ->whereIn('name', ['Beginner', 'Intermediate', 'Advanced'])
             ->orderBy('id')
             ->pluck('name');
 
-        $languages = \App\Models\Course::select('language')->distinct()->orderBy('language')->pluck('language');
+        $languages = Course::select('language')->distinct()->orderBy('language')->pluck('language');
 
         return view('pages.courses', compact(
             'courses', 'categories', 'levels', 'languages'
@@ -92,7 +100,7 @@ class CourseController extends Controller
 
     public function show(string $slug)
     {
-        $course = \App\Models\Course::with(['instructor', 'modules.lessons', 'reviews.user'])
+        $course = Course::with(['instructor', 'modules.lessons', 'reviews.user'])
             ->when(is_numeric($slug), function ($q) use ($slug) {
                 $q->where(fn ($qq) => $qq->where('slug', $slug)->orWhere('id', (int) $slug));
             }, fn ($q) => $q->where('slug', $slug))
@@ -114,10 +122,10 @@ class CourseController extends Controller
         $instructorCourses = 0;
         $instructorStudents = 0;
         if ($course->instructor) {
-            $instructorCourses = \App\Models\Course::where('instructor_id', $course->instructor->id)->count();
-            $instructorStudents = \App\Models\Enrollment::whereIn(
+            $instructorCourses = Course::where('instructor_id', $course->instructor->id)->count();
+            $instructorStudents = Enrollment::whereIn(
                 'course_id',
-                \App\Models\Course::where('instructor_id', $course->instructor->id)->pluck('id')
+                Course::where('instructor_id', $course->instructor->id)->pluck('id')
             )->distinct('user_id')->count('user_id');
         }
 
@@ -128,10 +136,10 @@ class CourseController extends Controller
         $certificate = null;
 
         if (auth()->check()) {
-            $enrollment = \App\Models\Enrollment::where('user_id', auth()->id())
+            $enrollment = Enrollment::where('user_id', auth()->id())
                 ->where('course_id', $course->id)
                 ->first();
-            $certificate = \App\Models\Certificate::where('user_id', auth()->id())
+            $certificate = Certificate::where('user_id', auth()->id())
                 ->where('course_id', $course->id)
                 ->first();
         }
@@ -141,7 +149,7 @@ class CourseController extends Controller
         $bestScores = [];
         $attemptCounts = [];
         if (auth()->check() && ($enrollment || auth()->user()->hasRole('admin'))) {
-            $rows = \App\Models\QuizAttempt::where('user_id', auth()->id())
+            $rows = QuizAttempt::where('user_id', auth()->id())
                 ->whereIn('quiz_id', $quizzes->pluck('id'))
                 ->whereNotNull('completed_at')
                 ->selectRaw('quiz_id, MAX(score) as best, COUNT(*) as total')
@@ -152,9 +160,9 @@ class CourseController extends Controller
         }
 
         $wishlisted = auth()->check()
-            && \App\Models\Wishlist::where('user_id', auth()->id())->where('course_id', $course->id)->exists();
+            && Wishlist::where('user_id', auth()->id())->where('course_id', $course->id)->exists();
 
-        $comingSoon = \App\Support\ContentDrip::courseComingSoon($course);
+        $comingSoon = ContentDrip::courseComingSoon($course);
         $unlocksAt = $course->unlocks_at;
 
         return view('pages.course-detail', compact(
@@ -178,9 +186,9 @@ class CourseController extends Controller
         ));
     }
 
-    public function toggleWishlist(\App\Models\Course $course)
+    public function toggleWishlist(Course $course)
     {
-        $added = \App\Models\Wishlist::toggle(auth()->user(), $course);
+        $added = Wishlist::toggle(auth()->user(), $course);
 
         return back()->with('success', $added ? 'Course saved to your wishlist.' : 'Course removed from your wishlist.');
     }

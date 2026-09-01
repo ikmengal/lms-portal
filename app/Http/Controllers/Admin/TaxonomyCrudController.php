@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
+use App\Models\Course;
 
 abstract class TaxonomyCrudController extends Controller
 {
@@ -147,7 +148,7 @@ abstract class TaxonomyCrudController extends Controller
     {
         $fk = $this->fkColumn();
 
-        return \App\Models\Course::withTrashed()
+        return Course::withTrashed()
             ->selectRaw("$fk as term_id, COUNT(*) as total")
             ->whereNotNull($fk)
             ->groupBy($fk)
