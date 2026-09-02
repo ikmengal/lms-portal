@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Support\ContentDrip;
 use App\Models\{
+    CourseCategory,
+    CourseLevel,
     Certificate,
     QuizAttempt,
     Enrollment,
