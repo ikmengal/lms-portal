@@ -109,45 +109,7 @@
         </div>
     </section>
 
-    {{-- Recently issued --}}
-    @if($recent->isNotEmpty())
-        <section class="py-16 bg-gray-50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-end justify-between mb-8 flex-wrap gap-3">
-                    <div>
-                        <span class="text-sm font-semibold text-primary-600 uppercase tracking-wider">Live Feed</span>
-                        <h2 class="text-3xl font-bold text-gray-900 mt-2">Recently Issued Certificates</h2>
-                    </div>
-                    <a href="{{ route('courses.index') }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-primary-600 hover:text-primary-700 transition">
-                        Earn yours — browse courses
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-                    </a>
-                </div>
-
-                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($recent as $cert)
-                        <a href="{{ route('certificates.verify', $cert->code) }}" class="group block bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-secondary-200 transition-all duration-300 p-6 relative overflow-hidden">
-                            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-secondary-400 to-primary-500"></div>
-                            <div class="flex items-start justify-between mb-4">
-                                <div class="w-12 h-12 bg-secondary-50 rounded-xl grid place-items-center shrink-0">
-                                    <svg class="w-6 h-6 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"/></svg>
-                                </div>
-                                <span class="px-2.5 py-1 bg-secondary-50 text-secondary-700 text-[10px] font-bold uppercase tracking-wide rounded-full">Verified</span>
-                            </div>
-                            <h3 class="font-bold text-gray-900 group-hover:text-primary-700 transition leading-snug line-clamp-2 mb-2 min-h-[2.5rem]">{{ $cert->course?->title ?? 'Course' }}</h3>
-                            <p class="text-sm text-gray-500">Awarded to <span class="font-semibold text-gray-700">{{ $cert->user?->name ?? 'Learner' }}</span></p>
-                            <div class="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between text-xs text-gray-400">
-                                <span>{{ $cert->issued_at->format('M d, Y') }}</span>
-                                <span class="font-mono font-semibold text-gray-500 group-hover:text-primary-600 transition">{{ $cert->code }}</span>
-                            </div>
-                        </a>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-    @endif
-
-    {{-- CTA --}}
+{{-- CTA --}}
     <section class="py-16 bg-white">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-gradient-to-r from-primary-600 to-primary-800 rounded-3xl px-8 py-12 text-center relative overflow-hidden">
