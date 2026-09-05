@@ -188,7 +188,7 @@
                                         <p class="text-sm text-gray-700 whitespace-pre-line">{{ $note->content }}</p>
                                         <div class="flex items-center justify-between mt-2">
                                             <span class="text-xs text-gray-400">{{ $note->created_at->diffForHumans() }}</span>
-                                            <form method="POST" action="{{ route('learn.notes.destroy', $note) }}" onsubmit="return confirm('Delete this note?')">
+                                            <form method="POST" action="{{ route('learn.notes.destroy', $note) }}" data-confirm="Delete this note?" data-confirm-title="Delete Note" data-confirm-icon="warning" data-confirm-button="Delete">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-xs text-red-400 opacity-0 group-hover:opacity-100 hover:text-red-600 transition">delete</button>

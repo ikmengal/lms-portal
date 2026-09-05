@@ -7,12 +7,12 @@ use App\Notifications\AccountActivationNotification;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\{
-    Password, Auth, DB, Hash,
-    URL
+    Password, Auth, DB, Hash, URL
 };
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\User;
+use Spatie\Activitylog\Facades\Activity;
 
 class AuthController extends Controller
 {
@@ -56,8 +56,11 @@ class AuthController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
 
+            Activity::causedBy($user)->event('login')->log('User logged in');
+
             // Check if user has any role
             if ($user->getRoleNames()->isEmpty()) {
+                Activity::causedBy($user)->event('login')->log('Login blocked: no role assigned');
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
@@ -109,6 +112,12 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $user = Auth::user();
+
+        if ($user) {
+            Activity::causedBy($user)->event('logout')->log('User logged out');
+        }
+
         Auth::logout();
 
         $request->session()->invalidate();

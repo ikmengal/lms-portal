@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use App\Notifications\ResetPasswordNotification;
+use App\Models\Concerns\HasActivityLog;
 use Spatie\Permission\Traits\HasRoles;
+use Spatie\Activitylog\Traits\CausesActivity;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -18,7 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasRoles, SoftDeletes;
+    use HasFactory, Notifiable, HasRoles, CausesActivity, HasActivityLog, SoftDeletes;
 
     protected $guard_name = 'web';
 

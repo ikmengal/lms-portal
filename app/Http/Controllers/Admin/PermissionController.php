@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use Spatie\Permission\Models\Permission;
+use Spatie\Activitylog\Facades\Activity;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
@@ -28,7 +29,8 @@ class PermissionController extends Controller
     {
         $data = $this->validated($request);
 
-        Permission::create(['name' => $data['name'], 'guard_name' => 'web']);
+        $permission = Permission::create(['name' => $data['name'], 'guard_name' => 'web']);
+        Activity::causedBy(auth()->user())->performedOn($permission)->event('created')->log('Permission created');
 
         app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
@@ -41,6 +43,7 @@ class PermissionController extends Controller
         $data = $this->validated($request, $id);
 
         $permission->update(['name' => $data['name']]);
+        Activity::causedBy(auth()->user())->performedOn($permission)->event('updated')->log('Permission updated');
 
         app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
@@ -53,6 +56,7 @@ class PermissionController extends Controller
 
         DB::table('role_has_permissions')->where('permission_id', $permission->id)->delete();
         DB::table('model_has_permissions')->where('permission_id', $permission->id)->delete();
+        Activity::causedBy(auth()->user())->performedOn($permission)->event('deleted')->log('Permission deleted');
         $permission->delete();
 
         app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();

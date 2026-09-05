@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Spatie\Activitylog\Facades\Activity;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -50,6 +51,8 @@ class UserController extends Controller
         ]);
 
         $user->assignRole($validated['role']);
+        Activity::causedBy(auth()->user())->performedOn($user)->event('created')->log('User created');
+        Activity::causedBy(auth()->user())->performedOn($user)->event('assigned')->log('Role assigned: ' . $validated['role']);
 
         return redirect()->route('admin.users')->with('success', 'User created successfully.');
     }
@@ -85,7 +88,9 @@ class UserController extends Controller
 
         if (!$user->hasRole($validated['role'])) {
             $user->syncRoles([$validated['role']]);
+            Activity::causedBy(auth()->user())->performedOn($user)->event('assigned')->log('Role assigned: ' . $validated['role']);
         }
+        Activity::causedBy(auth()->user())->performedOn($user)->event('updated')->log('User updated');
 
         return redirect()->route('admin.users')->with('success', 'User updated successfully.');
     }
@@ -94,6 +99,7 @@ class UserController extends Controller
     {
         abort_if($user->id === Auth::id(), 403, 'You cannot delete your own account.');
 
+        Activity::causedBy(auth()->user())->performedOn($user)->event('deleted')->log('User deleted');
         $user->delete();
 
         return redirect()->route('admin.users')->with('success', 'User deleted successfully.');

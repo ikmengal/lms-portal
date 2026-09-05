@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasLocalizedFields;
+use App\Models\Concerns\HasActivityLog;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -12,6 +13,7 @@ class Lesson extends Model
 {
     use SoftDeletes;
     use HasLocalizedFields;
+    use HasActivityLog;
 
     protected $fillable = ['course_module_id', 'title', 'translations', 'unlocks_at', 'duration_minutes', 'sort_order', 'video_url', 'description'];
 

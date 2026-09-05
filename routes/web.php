@@ -10,7 +10,8 @@ use App\Http\Controllers\Admin\{
     LevelController,
     QuizController,
     UserController,
-    RoleController
+    RoleController,
+    LogController,
 };
 use App\Http\Controllers\{
     NotificationController,
@@ -243,6 +244,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::post('/', 'store')->name('store');
         Route::put('{id}', 'update')->name('update');
         Route::delete('{id}', 'destroy')->name('destroy');
+    });
+
+    // Activity Logs
+    Route::controller(LogController::class)->prefix('activity-logs')->name('activity-logs.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/{activity}', 'show')->name('show');
+        Route::delete('/{id}', 'destroy')->name('destroy');
+        Route::delete('/', 'destroyAll')->name('destroyAll');
     });
 
     // Categories Management

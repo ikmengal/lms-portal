@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use Spatie\Permission\Models\Permission;
+use Spatie\Activitylog\Facades\Activity;
 use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\Controller;
 use Spatie\Permission\Models\Role;
@@ -34,7 +35,9 @@ class RoleController extends Controller
         $data = $this->validated($request);
 
         $role = Role::create(['name' => $data['name'], 'guard_name' => 'web']);
-        $role->syncPermissions($request->input('permissions', []));
+        Activity::causedBy(auth()->user())->performedOn($role)->event('created')->log('Role created');
+        $role->syncPermissions(array_map('intval', $request->input('permissions', [])));
+        Activity::causedBy(auth()->user())->performedOn($role)->event('assigned')->log('Permissions assigned to role');
 
         $this->flushCache();
 
@@ -59,7 +62,9 @@ class RoleController extends Controller
         $name = in_array($role->name, self::SYSTEM_ROLES, true) ? $role->name : $data['name'];
 
         $role->update(['name' => $name]);
-        $role->syncPermissions($request->input('permissions', []));
+        Activity::causedBy(auth()->user())->performedOn($role)->event('updated')->log('Role updated');
+        $role->syncPermissions(array_map('intval', $request->input('permissions', [])));
+        Activity::causedBy(auth()->user())->performedOn($role)->event('assigned')->log('Permissions assigned to role');
 
         $this->flushCache();
 
@@ -72,6 +77,7 @@ class RoleController extends Controller
             return back()->with('error', "\"{$role->name}\" is assigned to {$role->users()->count()} user(s). Remove it from those users first.");
         }
 
+        Activity::causedBy(auth()->user())->performedOn($role)->event('deleted')->log('Role deleted');
         $role->delete();
         $this->flushCache();
 

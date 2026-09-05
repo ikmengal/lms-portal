@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasActivityLog;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 
 class Discussion extends Model
 {
+    use HasActivityLog;
+
     protected $fillable = ['user_id', 'course_id', 'lesson_id', 'parent_id', 'body', 'is_answered', 'answered_by'];
 
     protected function casts(): array

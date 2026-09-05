@@ -1,15 +1,15 @@
 <?php
 
 use Spatie\Permission\DefaultTeamResolver;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
+use App\Models\Permission;
+use App\Models\Role;
 
 return [
 
     'models' => [
 
         /*
-         * When using the "HasPermissions" trait from this package, we need to know which
+         * When using the "HasRoles" trait from this package, we need to know which
          * Eloquent model should be used to retrieve your permissions. Of course, it
          * is often just the "Permission" model but you may use whatever you like.
          *
@@ -28,7 +28,7 @@ return [
          * `Spatie\Permission\Contracts\Role` contract.
          */
 
-        'role' => Role::class,
+        'role' => \App\Models\Role::class,
 
         /*
          * When using the "Teams" feature from this package, we need to know which

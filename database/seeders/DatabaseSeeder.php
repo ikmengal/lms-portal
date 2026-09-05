@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -40,6 +40,7 @@ class DatabaseSeeder extends Seeder
             'view reports',
             'manage roles',
             'manage settings',
+            'view logs',
             // Instructor
             'manage own courses',
             'grade students',
@@ -73,14 +74,16 @@ class DatabaseSeeder extends Seeder
         $admin->givePermissionTo([
             'view analytics', 'manage messages', 'manage users', 'manage courses',
             'manage categories', 'manage levels', 'view reports', 'manage roles', 'manage settings',
-            'view dashboard',
+            'view dashboard', 'view logs',
         ]);
+        $admin->syncPermissions($admin->permissions);
 
         $instructor = new Role();
         $instructor->name = 'instructor';
         $instructor->guard_name = $guard;
         $instructor->save();
         $instructor->givePermissionTo(['manage own courses', 'grade students', 'view earnings', 'view dashboard']);
+        $instructor->syncPermissions($instructor->permissions);
 
         $student = new Role();
         $student->name = 'student';
@@ -90,6 +93,7 @@ class DatabaseSeeder extends Seeder
             'enroll courses', 'view dashboard', 'view learning', 'view progress',
             'manage wishlist', 'view activity', 'view quiz history', 'view assignment history', 'view certificates',
         ]);
+        $student->syncPermissions($student->permissions);
 
         // Create/update users
         $users = [

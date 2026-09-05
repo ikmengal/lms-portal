@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasLocalizedFields;
+use App\Models\Concerns\HasActivityLog;
 use App\Models\LiveClass;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,6 +15,7 @@ class Course extends Model
 {
     use SoftDeletes;
     use HasLocalizedFields;
+    use HasActivityLog;
 
     protected $fillable = [
         'title',

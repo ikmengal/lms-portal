@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasActivityLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payment extends Model
 {
+    use HasActivityLog;
     public const METHODS = [
         'paypal' => 'PayPal',
         'square' => 'Square',
